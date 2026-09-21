@@ -46,8 +46,24 @@ function clean(bars: Bar[]): Bar[] {
 // Token-level: aggregates every pool. Serves the LAST ~100 bars only. `client_id`
 // is single-use and auth failures arrive as HTTP 200 with a non-zero `code`.
 
-async function gmgnBars(mint: string, res: Res): Promise<Bar[]> {
+// Calls are serialised and spaced, and a 429 (GMGN bans the IP after repeated
+// violations) pauses GMGN for this instance so we fall back instead of digging deeper.
+let gmgnChain: Promise<unknown> = Promise.resolve();
+let gmgnPausedUntil = 0;
+const GMGN_SPACING_MS = 1_100;
+const GMGN_PAUSE_MS = 10 * 60_000;
+
+function gmgnBars(mint: string, res: Res): Promise<Bar[]> {
+  const run = () => gmgnFetch(mint, res);
+  const p = gmgnChain.then(run, run);
+  const gap = () => new Promise((ok) => setTimeout(ok, GMGN_SPACING_MS));
+  gmgnChain = p.then(gap, gap);
+  return p;
+}
+
+async function gmgnFetch(mint: string, res: Res): Promise<Bar[]> {
   if (!GMGN_KEY) throw new Error("GMGN_API_KEY not set");
+  if (Date.now() < gmgnPausedUntil) throw new Error("gmgn paused after 429");
   const qs = new URLSearchParams({
     chain: "sol",
     address: mint,
@@ -67,6 +83,7 @@ async function gmgnBars(mint: string, res: Res): Promise<Bar[]> {
   } catch {
     throw new Error(`gmgn HTTP ${r.status} non-JSON: ${text.slice(0, 80)}`);
   }
+  if (r.status === 429 || j.code === 429) gmgnPausedUntil = Date.now() + GMGN_PAUSE_MS;
   if (j.code !== 0) throw new Error(`gmgn code ${String(j.code)} ${String(j.message ?? "")} (HTTP ${r.status})`);
   const list = Array.isArray(j.data?.list) ? j.data!.list! : [];
   return clean(
