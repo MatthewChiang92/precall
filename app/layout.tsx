@@ -7,7 +7,7 @@ const display = Big_Shoulders({ variable: "--font-display", subsets: ["latin"], 
 const sans = IBM_Plex_Sans({ variable: "--font-sans", subsets: ["latin"], weight: ["400", "500", "600"] });
 const mono = IBM_Plex_Mono({ variable: "--font-mono", subsets: ["latin"], weight: ["400", "500", "600"] });
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://precall.vercel.app";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://precall-six.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
