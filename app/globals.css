@@ -251,3 +251,11 @@ button { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .ticket, .inked { animation: none; }
 }
+
+/* fly the chart */
+.fly-overlay {
+  position: absolute; inset: 2px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; text-align: center; background: rgba(241, 235, 221, 0.82); border-radius: 3px; padding: 16px;
+}
+.stamp.picked.up-btn:hover:not(:disabled) { background: var(--up); }
+.stamp.picked.down-btn:hover:not(:disabled) { background: var(--down); }
