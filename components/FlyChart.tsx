@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { dayLabel, fmtPct, fmtPrice, jupiterUrl } from "@/lib/format";
+import { dayLabel, fmtPct, fmtPrice } from "@/lib/format";
+import { BuyButton } from "./BuyButton";
 
 export type FlyRound = {
   date: string; // YYYY-MM or YYYY-MM-DD
@@ -724,15 +725,11 @@ function Sidebar({
         </ul>
         <div className="muted">Valuations as reported (post-money unless noted). Rounds without a reported valuation are left out.</div>
       </details>
-      <a
-        className="btn ghost"
-        href={jupiterUrl(s.mint)}
-        target="_blank"
-        rel="noreferrer"
-        style={{ justifyContent: "center" }}
-      >
-        Trade {s.symbol} on Jupiter ↗
-      </a>
+      <BuyButton
+        className="btn buy"
+        label={`Buy ${s.name} on Jupiter`}
+        token={{ symbol: s.symbol, name: s.name, mint: s.mint, image: s.image, url: null, price: null, premium: null }}
+      />
     </div>
   );
 }

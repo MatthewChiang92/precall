@@ -1,5 +1,6 @@
 import "server-only";
 import { claim, markFetch, sql, touch } from "./db";
+import { refreshNews } from "./news";
 import { refreshRegistry } from "./prestocks";
 import {
   type Bar,
@@ -11,6 +12,7 @@ import {
   refreshBars,
   sourceAvailable,
 } from "./prices";
+import { refreshVibe } from "./vibe";
 import { DAY_MS, HISTORY_DAYS, LAUNCH_DAY, addDays, clock, dayStart, settleable } from "./time";
 
 /** A move smaller than this (0.01%) is a push: nobody wins or loses it. */
@@ -113,7 +115,7 @@ export async function settlePending(now = Date.now()): Promise<{ settled: number
 }
 
 /** Everything the site needs kept warm. Safe to call from any request; all steps are throttled. */
-export async function refreshAll(now = Date.now()) {
+export async function refreshAll(now = Date.now(), newsBudgetMs = 45_000) {
   await refreshRegistry();
   // Settle first: it fetches fresh hourly series and marks them, so the display
   // refresh below does not fetch the same data twice.
@@ -123,5 +125,8 @@ export async function refreshAll(now = Date.now()) {
     await refreshBars(t.mint, "1h");
     await refreshBars(t.mint, "1d");
   }
-  return out;
+  // News after prices: the index reads both. Each step is throttled and never throws.
+  const news = await refreshNews(newsBudgetMs, now).catch((e) => ({ error: String(e) }));
+  await refreshVibe(now).catch((e) => console.error("vibe", e));
+  return { ...out, news };
 }

@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Board, BoardToken } from "@/lib/state";
-import { countdown, dayLabel, fmtPct, fmtPrice, jupiterUrl, signClass } from "@/lib/format";
-import { Gauge, moodWord } from "./Gauge";
+import { countdown, dayLabel, fmtPct, fmtPrice, signClass } from "@/lib/format";
+import { band } from "@/lib/vibe-model";
+import type { VibeSummary } from "@/lib/vibe";
+import { BuyButton } from "./BuyButton";
+import { Gauge } from "./Gauge";
 import { Spark } from "./Spark";
 import { usePlayer } from "./usePlayer";
 
@@ -188,28 +191,21 @@ export function Play({ initial }: { initial: Board }) {
         </div>
 
         <div className="panel">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-            <div className="kicker">Crowd mood · {board.liveRound >= 1 ? `live round №${board.liveRound}` : "opens with round №1"}</div>
-            <Link href="/how#mood" className="kicker">
-              what&apos;s this?
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+            <div className="kicker">PreStocks fear &amp; greed · today</div>
+            <Link href="/vibe" className="kicker">
+              full index →
             </Link>
           </div>
-          <div className="gauge-wrap">
-            <Gauge value={mood} />
-            <div className="gauge-num">{mood === null ? "—" : Math.round(mood)}</div>
-            <div className="gauge-word">{mood === null ? "No calls locked yet" : moodWord(mood)}</div>
-            <div className="muted mono" style={{ fontSize: 11 }}>
-              share of locked calls that say UP
-            </div>
-          </div>
+          <MarketGauge vibe={board.vibe} />
           <div className="statrow">
             <div className="stat">
               <div className="v">{me ? me.streak : "—"}</div>
               <div className="k">your streak</div>
             </div>
-            <div className="stat">
-              <div className="v">{board.openCallCount}</div>
-              <div className="k">calls on this slip</div>
+            <div className="stat" title="Share of all locked calls in the live round that say UP">
+              <div className="v">{mood === null ? "—" : `${Math.round(mood)}%`}</div>
+              <div className="k">crowd says up</div>
             </div>
             <div className="stat">
               <div className="v">{board.players}</div>
@@ -243,6 +239,7 @@ export function Play({ initial }: { initial: Board }) {
               i={i}
               mine={myOpen[t.symbol]}
               crowd={me?.openCrowd[t.symbol] ?? null}
+              vibe={board.vibe.bySymbol[t.symbol] ?? null}
               disabled={!pid || lockIn <= 0}
               onCall={(d) => call(t.symbol, d)}
             />
@@ -270,6 +267,7 @@ function Ticket({
   i,
   mine,
   crowd,
+  vibe,
   disabled,
   onCall,
 }: {
@@ -277,6 +275,7 @@ function Ticket({
   i: number;
   mine?: Dir;
   crowd: Crowd | null;
+  vibe: VibeSummary["bySymbol"][string] | null;
   disabled: boolean;
   onCall: (d: Dir) => void;
 }) {
@@ -309,11 +308,15 @@ function Ticket({
           <b className={signClass(t.premium)}>{t.premium === null ? "—" : fmtPct(t.premium, 1)}</b>
         </div>
       </div>
+      <TicketVibe symbol={t.symbol} vibe={vibe} />
       {t.note && <div className="t-note">{t.note}</div>}
-      <div className="t-links">
-        <a href={jupiterUrl(t.mint)} target="_blank" rel="noreferrer">
-          Trade on Jupiter ↗
-        </a>
+      <div className="t-links" style={{ alignItems: "center" }}>
+        <BuyButton
+          className="btn buy sm"
+          label="Buy"
+          token={{ symbol: t.symbol, name: t.name, mint: t.mint, image: t.image, url: t.url, price: t.tokenPrice, premium: t.premium }}
+        />
+        <Link href={`/vibe/${t.symbol.toLowerCase()}`}>Why this score</Link>
         {t.url && (
           <a href={t.url} target="_blank" rel="noreferrer">
             PreStocks ↗
@@ -357,6 +360,83 @@ function Ticket({
         )}
       </div>
     </article>
+  );
+}
+
+function MarketGauge({ vibe }: { vibe: VibeSummary }) {
+  const v = vibe.market.now?.score ?? null;
+  const delta = v !== null && vibe.market.yesterday !== null && vibe.market.now?.day !== undefined ? v - vibe.market.yesterday : null;
+  return (
+    <div className="gauge-wrap">
+      <Gauge value={v} />
+      <div className="gauge-num">{v === null ? "—" : Math.round(v)}</div>
+      <div className="gauge-word">{v === null ? "Reading the news…" : band(v).word}</div>
+      <div className="bench">
+        {delta !== null && vibe.market.now?.day === vibe.day && (
+          <>
+            <b className={signClass(delta / 100)}>{delta >= 0 ? "▲" : "▼"} {Math.abs(Math.round(delta))}</b> since yesterday ·{" "}
+          </>
+        )}
+        {vibe.market.now?.stories ?? 0} headlines today
+        {vibe.crypto !== null && (
+          <>
+            {" "}· crypto <b>{Math.round(vibe.crypto)}</b>
+          </>
+        )}
+      </div>
+      <div className="muted mono" style={{ fontSize: 10.5, textAlign: "center", marginTop: 2 }}>
+        40% news sentiment · 25% momentum · 20% volume · 15% premium
+      </div>
+      {vibe.lead && (
+        <div className="t-vibe" style={{ marginTop: 10, alignSelf: "stretch", borderTop: "1px dashed var(--rule)", paddingTop: 8 }}>
+          <div className="kicker" style={{ fontSize: 10 }}>Moving the market</div>
+          <a className="t-story" href={vibe.lead.url} target="_blank" rel="noreferrer" title={vibe.lead.hits.join(" ")}>
+            <span className={`tone ${vibe.lead.s > 0 ? "up" : "down"}`}>{vibe.lead.s > 0 ? "BULL" : "BEAR"}</span>
+            {vibe.lead.title}
+            {vibe.lead.publisher && <span className="muted"> · {vibe.lead.publisher}</span>}
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function VibeChip({ score, href }: { score: number | null; href: string }) {
+  if (score === null)
+    return (
+      <Link href={href} className="vibe-chip" title="No news in the last three days, so no score">
+        <span className="n" style={{ background: "var(--ink-3)" }}>–</span>no coverage
+      </Link>
+    );
+  const b = band(score);
+  return (
+    <Link href={href} className="vibe-chip" title="PreStocks fear & greed for this company, from news, momentum, volume and premium">
+      <span className="n" style={{ background: b.color }}>{Math.round(score)}</span>
+      {b.word}
+    </Link>
+  );
+}
+
+function TicketVibe({ symbol, vibe }: { symbol: string; vibe: VibeSummary["bySymbol"][string] | null }) {
+  const href = `/vibe/${symbol.toLowerCase()}`;
+  const top = vibe?.top ?? null;
+  return (
+    <div className="t-vibe">
+      <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "space-between" }}>
+        <VibeChip score={vibe?.now?.score ?? null} href={href} />
+        <span className="muted mono" style={{ fontSize: 10.5 }}>
+          {vibe?.stories3d ?? 0} headlines · 3 days
+        </span>
+      </div>
+      {top && (
+        <a className="t-story" href={top.url} target="_blank" rel="noreferrer" title={top.hits.join(" ") || "neutral"}>
+          <span className={`tone ${top.s > 0.05 ? "up" : top.s < -0.05 ? "down" : "flat"}`}>
+            {top.s > 0.05 ? "BULL" : top.s < -0.05 ? "BEAR" : "NEUT"}
+          </span>
+          {top.title}
+        </a>
+      )}
+    </div>
   );
 }
 

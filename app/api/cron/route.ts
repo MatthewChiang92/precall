@@ -1,6 +1,7 @@
 import { refreshRegistry } from "@/lib/prestocks";
 import { PRIMARY, fetchBars } from "@/lib/prices";
 import { refreshAll } from "@/lib/rounds";
+import { refreshVibe } from "@/lib/vibe";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -27,6 +28,9 @@ export async function GET(req: Request) {
     return Response.json({ primary: PRIMARY, hasKey: Boolean(process.env.GMGN_API_KEY), gmgn: await probe("gmgn") });
   }
   await refreshRegistry(true);
-  const out = await refreshAll();
+  // ?news=<seconds> gives the news backfill a bigger slice of this run.
+  const newsSec = Number(new URL(req.url).searchParams.get("news") ?? 120);
+  const out = await refreshAll(Date.now(), Math.min(Math.max(newsSec, 10), 240) * 1000);
+  await refreshVibe(Date.now(), true);
   return Response.json({ ok: true, primary: PRIMARY, ...out });
 }

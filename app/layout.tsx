@@ -36,6 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </Link>
             <nav className="nav">
               <Link href="/">Play</Link>
+              <Link href="/vibe">Fear &amp; Greed</Link>
               <Link href="/rewind">Rewind</Link>
               <Link href="/fly">Seed to IPO</Link>
               <Link href="/ipo">The Bell</Link>
@@ -52,7 +53,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               PreStocks
             </a>{" "}
             pre-IPO tokens on Solana. Token list read live from the PreStocks API; prices from on-chain
-            trades. Not financial advice, no wallet, no money in play.
+            trades; headlines from Google News. Playing needs no wallet and no money. Buying opens Jupiter&apos;s own swap in your own
+            wallet. Not financial advice.
           </p>
         </footer>
       </body>

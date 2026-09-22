@@ -3,6 +3,7 @@ import { sql } from "./db";
 import { type Crowd, crowdFor, playerCount } from "./game";
 import { listTokens } from "./prestocks";
 import { PRIMARY, priceAt, readBars } from "./prices";
+import { type VibeSummary, getVibeSummary } from "./vibe";
 import { DAY_MS, HISTORY_DAYS, HOUR_MS, addDays, clock, dayStart, roundNumber } from "./time";
 
 /** Context a player needs that no API states. Keyed by ticker; tokens without a note get none. */
@@ -51,6 +52,7 @@ export interface Board {
   openCallCount: number;
   players: number;
   primarySource: string;
+  vibe: VibeSummary;
 }
 
 export async function getBoard(now = Date.now()): Promise<Board> {
@@ -58,13 +60,14 @@ export async function getBoard(now = Date.now()): Promise<Board> {
   const liveStart = dayStart(c.liveDay);
   const firstHistory = addDays(c.liveDay, -HISTORY_DAYS);
 
-  const [tokens, resultRows, crowds, openCount, players] = await Promise.all([
+  const [tokens, resultRows, crowds, openCount, players, vibe] = await Promise.all([
     listTokens(),
     sql`select day::text as day, symbol, ret, result, open_price, close_price, source
         from round_results where day >= ${firstHistory}::date order by day desc`,
     crowdFor([c.liveDay]),
     sql`select count(*)::int as n from calls where day = ${c.openDay}::date`,
     playerCount(),
+    getVibeSummary(now),
   ]);
 
   const boardTokens: BoardToken[] = await Promise.all(
@@ -128,6 +131,7 @@ export async function getBoard(now = Date.now()): Promise<Board> {
     openCallCount: openCount[0]?.n ?? 0,
     players,
     primarySource: PRIMARY,
+    vibe,
   };
 }
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { WEIGHTS } from "@/lib/vibe-model";
 
 export const metadata: Metadata = { title: "How it works · PreCall" };
 
@@ -29,8 +30,9 @@ export default function How() {
       <h2>The tokens</h2>
       <p>
         The list is read live from the public <code>prestocks.com/api/prestocks</code> registry. Nothing is hardcoded: when
-        PreStocks lists a new company, it joins the next slip on its own. Each token links to its PreStocks page and to a
-        Jupiter swap, so a call can become a position if you want it to.
+        PreStocks lists a new company, it joins the next slip on its own, and its news is tracked from that day. Each token has a <b>Buy</b> button that
+        opens Jupiter&apos;s own swap widget, locked to that PreStocks token, in your own wallet: a call can become a
+        position if you want it to. PreCall never holds funds or keys.
       </p>
 
       <h2>The prices</h2>
@@ -49,11 +51,44 @@ export default function How() {
         from the PreStocks API, so both sides share one basis.
       </p>
 
-      <h2 id="mood">Crowd mood</h2>
+      <h2 id="index">PreStocks fear &amp; greed</h2>
       <p>
-        The gauge is the share of all locked calls in the live round that say UP, from 0 (everyone bearish) to 100 (everyone
-        bullish). Bands follow the familiar fear-and-greed layout: under 25 max bearish, 25-44 bearish, 45-55 split, 56-75
-        bullish, over 75 max bullish. It is what players think, not a model&apos;s guess.
+        A daily 0-100 score for every company, and for the PreStocks market as a whole (the mean of the companies scored
+        that day). It is driven by <b>news and on-chain trading, not by players</b>, so it moves every day whether or not
+        anyone is playing. Bands follow CoinMarketCap&apos;s: under 25 extreme fear, 25-44 fear, 45-55 neutral, 56-75 greed,
+        76 and up extreme greed. Today&apos;s value is provisional and updates as headlines and trades arrive.
+      </p>
+      <ul>
+        <li>
+          <b>News sentiment, {WEIGHTS.news}%.</b> Every Google News headline that names the company is scored bullish, neutral
+          or bearish by a published finance word list (&ldquo;raises&rdquo;, &ldquo;wins contract&rdquo;, &ldquo;lawsuit&rdquo;,
+          &ldquo;layoffs&rdquo;&hellip;), with negation handled (&ldquo;not approved&rdquo;). Stories about money, deals, courts
+          and regulators count double; explainers and questions count half. The last three days count, weighted 1, ½ and ¼.
+          Each company page lists every headline with the words that scored it, so any number can be checked.
+        </li>
+        <li>
+          <b>Price momentum, {WEIGHTS.momentum}%.</b> The token&apos;s 7-day on-chain move divided by its own 30-day
+          volatility, so a 5% week means more for a calm token than a wild one.
+        </li>
+        <li>
+          <b>Trading volume, {WEIGHTS.volume}%.</b> Today&apos;s on-chain volume against its 30-day average. Heavy buying on an
+          up day reads as greed, heavy selling on a down day as fear, and quiet trading as neutral.
+        </li>
+        <li>
+          <b>Premium vs mark, {WEIGHTS.premium}%.</b> The token price over its PreStocks mark price, ranked across the
+          companies. The PreStocks API only gives today&apos;s mark, so this factor exists from the day the index began
+          recording it; earlier days use the other three factors, reweighted. Charts mark the join with a dotted line.
+        </li>
+      </ul>
+      <p>
+        A company with no headline in the last three days gets <b>no score</b>, not a fake 50. Headlines must name the
+        company in the title (search matches article bodies, which would otherwise attribute other companies&apos; news),
+        and sportsbook promo posts, which dominate prediction-market coverage, are filtered out. A word list is transparent
+        but blunt: it can misread sarcasm or a headline where good news for one side is bad for the other.
+      </p>
+      <p>
+        <b>Crowd mood</b> is shown separately on the play page: the share of locked calls in the live round that say UP. It
+        is what players think, and it never feeds the index.
       </p>
 
       <h2>SpaceX</h2>

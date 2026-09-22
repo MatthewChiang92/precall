@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { fmtPct, fmtPrice, jupiterUrl } from "@/lib/format";
+import { fmtPct, fmtPrice } from "@/lib/format";
+import { BuyButton } from "./BuyButton";
 import { FACTS, IPO, type PBar, SOURCES, SPLIT_EFFECTIVE, at } from "@/lib/ipo";
 
 type Line = { bars: PBar[]; color: string; label: string; width?: number };
@@ -314,9 +315,11 @@ function Lessons({ onRestart }: { onRestart: () => void }) {
         <a className="btn ghost" href="https://prestocks.com/spacex" target="_blank" rel="noreferrer">
           SpaceX on PreStocks ↗
         </a>
-        <a className="btn ghost" href={jupiterUrl(IPO.mint)} target="_blank" rel="noreferrer">
-          Trade SPACEX on Jupiter ↗
-        </a>
+        <BuyButton
+          className="btn ghost"
+          label="Trade the SpaceX token"
+          token={{ symbol: "SPACEX", name: "SpaceX", mint: IPO.mint, image: null, url: "https://prestocks.com/spacex", price: null, premium: null }}
+        />
         <button className="btn ghost" type="button" onClick={onRestart}>
           Replay from the start
         </button>
