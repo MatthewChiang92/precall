@@ -1,5 +1,6 @@
 import { refreshRegistry } from "@/lib/prestocks";
 import { PRIMARY, fetchBars } from "@/lib/prices";
+import { probeNews } from "@/lib/news";
 import { refreshAll } from "@/lib/rounds";
 import { refreshVibe } from "@/lib/vibe";
 
@@ -25,7 +26,7 @@ export async function GET(req: Request) {
         return { ok: false, error: String(e).slice(0, 300), ms: Date.now() - t };
       }
     };
-    return Response.json({ primary: PRIMARY, hasKey: Boolean(process.env.GMGN_API_KEY), gmgn: await probe("gmgn") });
+    return Response.json({ primary: PRIMARY, hasKey: Boolean(process.env.GMGN_API_KEY), gmgn: await probe("gmgn"), news: await probeNews() });
   }
   await refreshRegistry(true);
   // ?news=<seconds> gives the news backfill a bigger slice of this run.

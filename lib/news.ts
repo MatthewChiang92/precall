@@ -62,6 +62,18 @@ async function search(query: string, from: string, to: string): Promise<Omit<Sto
   return out;
 }
 
+/** Diagnostic: one live query from this runtime (Google may treat datacenter IPs differently). */
+export async function probeNews(): Promise<{ ok: boolean; items?: number; ms: number; error?: string }> {
+  const t = Date.now();
+  try {
+    const today = dayOf(Date.now());
+    const items = await search('"OpenAI"', addDays(today, -1), addDays(today, 1));
+    return { ok: true, items: items.length, ms: Date.now() - t };
+  } catch (e) {
+    return { ok: false, error: String(e).slice(0, 200), ms: Date.now() - t };
+  }
+}
+
 /** Same story syndicated under the same headline counts once per company. */
 const storyId = (symbol: string, title: string) =>
   createHash("sha1")
