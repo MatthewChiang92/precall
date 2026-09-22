@@ -3,12 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { after } from "next/server";
 import { BuyButton } from "@/components/BuyButton";
-import { Masthead, PAPER_NAME, Photo, Reading, Story, indexHeadline, moved } from "@/components/paper/Paper";
-import { PaperGauge } from "@/components/paper/PaperGauge";
+import { Gauge } from "@/components/Gauge";
 import { VibeChart } from "@/components/VibeChart";
-import { fmtPct, fmtPrice } from "@/lib/format";
+import { dayLabel, fmtPct, fmtPrice, signClass } from "@/lib/format";
 import { refreshAll } from "@/lib/rounds";
-import { companyStories, getVibeBoard, topStory } from "@/lib/vibe";
+import { companyStories, getVibeBoard } from "@/lib/vibe";
 import { FACTORS, FACTOR_LABEL, WEIGHTS, band, type Factor } from "@/lib/vibe-model";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +15,7 @@ export const maxDuration = 300;
 
 export async function generateMetadata(props: PageProps<"/vibe/[symbol]">): Promise<Metadata> {
   const { symbol } = await props.params;
-  return { title: `${symbol.toUpperCase()} · ${PAPER_NAME}` };
+  return { title: `${symbol.toUpperCase()} fear & greed · PreCall` };
 }
 
 const WHY: Record<Factor, string> = {
@@ -26,13 +25,7 @@ const WHY: Record<Factor, string> = {
   premium: "Token price over its PreStocks mark, ranked against the other companies. Recorded daily since the index started.",
 };
 
-const avg = (xs: (number | null)[]) => {
-  const v = xs.filter((x): x is number => x !== null);
-  return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : null;
-};
-const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
-export default async function Section(props: PageProps<"/vibe/[symbol]">) {
+export default async function CompanyVibe(props: PageProps<"/vibe/[symbol]">) {
   const { symbol: raw } = await props.params;
   after(() => refreshAll().catch((e) => console.error("refresh", e)));
   const v = await getVibeBoard();
@@ -41,170 +34,132 @@ export default async function Section(props: PageProps<"/vibe/[symbol]">) {
   const stories = await companyStories(c.symbol, 3);
   const today = c.series.at(-1) ?? null;
   const score = today?.score ?? null;
-  const yesterday = c.series.at(-2)?.score ?? null;
-  const market = v.market.at(-1)?.score ?? null;
-  const d7 = avg(c.series.slice(-7).map((r) => r.score));
-  const d30 = avg(c.series.map((r) => r.score));
+  const w7 = c.series.slice(-7).map((r) => r.score).filter((x): x is number => x !== null);
+  const w30 = c.series.map((r) => r.score).filter((x): x is number => x !== null);
+  const avg = (xs: number[]) => (xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : null);
   const bull = stories.filter((s) => s.s > 0.05).length;
   const bear = stories.filter((s) => s.s < -0.05).length;
 
-  const lead = topStory(stories);
-  const rest = stories.filter((s) => s !== lead);
-  const hed = score === null ? null : indexHeadline(c.name, score, yesterday);
-  const deck = [
-    score !== null && yesterday !== null ? `${cap(moved(score, yesterday, "yesterday"))}.` : null,
-    d7 !== null ? `7-day average ${d7}, 30-day ${d30}.` : null,
-    `${stories.length} headline${stories.length === 1 ? "" : "s"} in three days: ${bull} bullish, ${bear} bearish.`,
-  ]
-    .filter(Boolean)
-    .join(" ");
-
   return (
     <>
-      <Masthead
-        day={v.day}
-        sections={v.companies}
-        current={c.symbol}
-        leftEar={
-          <>
-            <span className="k">{c.name} today</span>
-            <Reading score={score} />
-            <span className="s">{today?.factors ?? 0} of 4 factors</span>
-          </>
-        }
-        rightEar={
-          <>
-            <span className="k">Whole market</span>
-            <Reading score={market} />
-            <span className="s">
-              <Link href="/vibe">Front page →</Link>
-            </span>
-          </>
-        }
-      />
-
-      <section className="np-flag">
-        {c.image && <Photo src={c.image} alt="" className="np-flag-logo" />}
-        <div className="np-flag-name">
-          <span className="np-kicker">Company section</span>
-          <h1>{c.name}</h1>
-        </div>
-        <div className="np-flag-quote">
-          <div>
-            <b>{c.symbol}</b> {fmtPrice(c.tokenPrice)}
-            {c.premium !== null && <> · {fmtPct(c.premium, 1)} vs PreStocks mark</>}
+      <div className="kicker">
+        <Link href="/vibe">← PreStocks fear &amp; greed</Link> · {dayLabel(v.day)}
+      </div>
+      <section className="vibe-grid" style={{ marginTop: 10 }}>
+        <div className="panel">
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {c.image ? <img src={c.image} alt="" width={38} height={38} className="logo" /> : null}
+            <div>
+              <div className="t-name">{c.name}</div>
+              <div className="t-tick">
+                {c.symbol} · {fmtPrice(c.tokenPrice)}
+                {c.premium !== null && (
+                  <>
+                    {" "}· <span className={signClass(c.premium)}>{fmtPct(c.premium, 1)}</span> vs mark
+                  </>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="np-flag-actions">
-            <BuyButton
-              className="np-btn"
-              label={`Buy ${c.symbol}`}
-              token={{ symbol: c.symbol, name: c.name, mint: c.mint, image: c.image, url: c.url, price: c.tokenPrice, premium: c.premium }}
-            />
-            <Link href="/#slip" className="np-btn ghost">
+          <div className="gauge-wrap" style={{ marginTop: 8 }}>
+            <Gauge value={score} />
+            <div className="gauge-num">{score === null ? "—" : Math.round(score)}</div>
+            <div className="gauge-word">{score === null ? "No coverage" : band(score).word}</div>
+            <div className="bench">
+              7d <b>{avg(w7) ?? "—"}</b> · 30d <b>{avg(w30) ?? "—"}</b> · {today?.factors ?? 0} of 4 factors
+            </div>
+          </div>
+          {score === null && (
+            <p className="muted" style={{ fontSize: 12.5 }}>
+              No headline has named {c.name} in the last three days, so there is no score. A neutral 50 would be made up.
+            </p>
+          )}
+          <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+            <BuyButton token={{ symbol: c.symbol, name: c.name, mint: c.mint, image: c.image, url: c.url, price: c.tokenPrice, premium: c.premium }} />
+            <Link href="/#slip" className="btn ghost">
               Make your call
             </Link>
           </div>
         </div>
-      </section>
 
-      <section className="np-banner">
-        <div className="np-kicker">{hed?.kicker ?? "No coverage"}</div>
-        <h1 className="np-banner-hed sm">{hed?.head ?? `No headlines, no score for ${c.name}`}</h1>
-        <p className="np-deck">
-          {score === null
-            ? `No headline has named ${c.name} in the last three days, so there is no reading today. A neutral 50 would be made up.`
-            : deck}
-        </p>
-      </section>
-
-      <section className="np-grid np-above">
-        <div className="np-col span-5">
-          <figure className="np-gauge">
-            <div className="np-box-title">{c.name} fear &amp; greed</div>
-            <PaperGauge value={score} />
-            <div className="np-gauge-read">
-              <span className="n">{score === null ? "—" : Math.round(score)}</span>
-              <span className="w">{score === null ? "No reading" : band(score).word}</span>
-            </div>
-            <figcaption>
-              {yesterday !== null ? <>Yesterday {Math.round(yesterday)}. </> : null}
-              {market !== null ? <>The whole PreStocks market reads {Math.round(market)}.</> : null}
-            </figcaption>
-          </figure>
-
-          <h2 className="np-rubric">What&apos;s in the number</h2>
-          <table className="np-table np-formula">
-            <tbody>
-              {FACTORS.map((k) => {
-                const val = today?.[k] ?? null;
-                return (
-                  <tr key={k}>
-                    <td>
-                      {FACTOR_LABEL[k]}
-                      <div className="why">
-                        {val === null && k !== "news" ? "No data today, so the other factors are reweighted. " : ""}
-                        {WHY[k]}
-                      </div>
-                    </td>
-                    <td className="num w">{WEIGHTS[k]}%</td>
-                    <td className="np-bar">{val !== null && <span style={{ width: `${val}%` }} />}</td>
-                    <td className="num">{val === null ? "—" : Math.round(val)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="np-col span-7">
-          {lead ? (
-            <>
-              <Story story={lead} size="lead" kicker="The story moving it most" cues />
-              <div className="np-columns">
-                {rest.slice(0, 10).map((s) => (
-                  <Story key={s.url} story={s} cues />
-                ))}
+        <div className="panel">
+          <div className="kicker" style={{ marginBottom: 4 }}>What&apos;s in today&apos;s number</div>
+          {FACTORS.map((k) => {
+            const val = today?.[k] ?? null;
+            return (
+              <div className="factor" key={k}>
+                <div>
+                  {FACTOR_LABEL[k]} <span className="w">{WEIGHTS[k]}%</span>
+                </div>
+                <div className="bar">{val !== null && <span style={{ width: `${val}%`, background: band(val).color }} />}</div>
+                <div className="v">{val === null ? "—" : Math.round(val)}</div>
+                <div className="why">{val === null && k !== "news" ? "Not enough data for this day, so the other factors are reweighted. " : ""}{WHY[k]}</div>
               </div>
-            </>
-          ) : (
-            <p className="np-note">No headlines naming {c.name} in the last three days.</p>
-          )}
+            );
+          })}
         </div>
       </section>
 
-      <section className="np-section">
-        <h2 className="np-section-head">
-          Score over price <span>30 days · on-chain daily close</span>
-        </h2>
-        <figure className="np-figure">
+      <section className="section">
+        <div className="section-head">
+          <h2 className="h-section">Score over price</h2>
+          <span className="kicker">30 days · on-chain daily close</span>
+        </div>
+        <div className="panel">
           <VibeChart
             days={v.days}
             lines={[
-              { label: "Token price", color: "var(--np-ink-3)", dash: "5 4", axis: "price", points: c.price.map((p) => ({ day: p.day, v: p.c })) },
-              { label: "Fear & greed", color: "var(--np-ink)", axis: "score", points: c.series.map((r) => ({ day: r.day, v: r.score })) },
+              { label: "Token price", color: "#8a8272", axis: "price", points: c.price.map((p) => ({ day: p.day, v: p.c })) },
+              { label: "Fear & greed", color: "#16130f", axis: "score", points: c.series.map((r) => ({ day: r.day, v: r.score })) },
             ]}
             marker={v.premiumFrom ? { day: v.premiumFrom, label: "4 factors from here · 3 before" } : null}
           />
-          <figcaption>
-            <b>Solid:</b> {c.name} fear &amp; greed, 0 to 100 on the left scale. <b>Dashed:</b> its PreStocks token&apos;s daily
-            on-chain close, on the right.
-          </figcaption>
-        </figure>
+          <div className="chart-legend">
+            <span>
+              <i style={{ borderColor: "#16130f" }} />
+              Fear &amp; greed (left, 0-100)
+            </span>
+            <span>
+              <i style={{ borderColor: "#8a8272" }} />
+              {c.name} token price (right)
+            </span>
+          </div>
+        </div>
       </section>
 
-      {rest.length > 10 && (
-        <section className="np-section">
-          <h2 className="np-section-head">
-            All the coverage <span>last three days, newest first</span>
-          </h2>
-          <div className="np-columns wide">
-            {rest.slice(10, 70).map((s) => (
-              <Story key={s.url} story={s} cues />
-            ))}
+      <section className="section">
+        <div className="section-head">
+          <h2 className="h-section">The headlines</h2>
+          <span className="kicker">
+            last 3 days · {stories.length} stories · <span className="up">{bull} bullish</span> ·{" "}
+            <span className="down">{bear} bearish</span>
+          </span>
+        </div>
+        {stories.length ? (
+          <div className="panel">
+            <ul className="stories">
+              {stories.slice(0, 60).map((s) => (
+                <li key={s.url}>
+                  <span className={`tone ${s.s > 0.05 ? "up" : s.s < -0.05 ? "down" : "flat"}`}>
+                    {s.s > 0.05 ? "BULL" : s.s < -0.05 ? "BEAR" : "NEUT"}
+                  </span>
+                  <a href={s.url} target="_blank" rel="noreferrer">
+                    {s.title}
+                  </a>
+                  <div className="meta">
+                    {s.publisher ?? "unknown"} · {new Date(s.publishedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" })} · weight {s.w}
+                    {s.hits.length ? ` · ${s.hits.join(" ")}` : " · no cue words"}
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {stories.length > 60 && <p className="muted mono" style={{ fontSize: 11 }}>Showing the 60 newest of {stories.length}.</p>}
           </div>
-          {rest.length > 70 && <p className="np-note">Showing 71 of {stories.length} stories.</p>}
-        </section>
-      )}
+        ) : (
+          <div className="empty">No headlines naming {c.name} in the last three days.</div>
+        )}
+      </section>
     </>
   );
 }

@@ -1,5 +1,4 @@
-// Score (0-100, left axis) over price (own scale, right axis) by day. Server-renderable SVG,
-// set in ink for the newspaper: the fear and greed extremes are tinted grey, not coloured.
+// Score (0-100, left axis) over price (own scale, right axis) by day. Server-renderable SVG.
 
 export interface ChartLine {
   label: string;
@@ -44,33 +43,33 @@ export function VibeChart({ days, lines, marker }: { days: string[]; lines: Char
   const fmtP = (v: number) => (v >= 1000 ? `$${(v / 1000).toFixed(1)}k` : `$${v.toFixed(v >= 100 ? 0 : 2)}`);
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="np-chart" role="img" aria-label={lines.map((l) => l.label).join(" and ")}>
+    <svg viewBox={`0 0 ${W} ${H}`} className="rw-chart" role="img" aria-label={lines.map((l) => l.label).join(" and ")}>
       {/* fear / greed bands */}
-      <rect x={PAD.l} y={ys(100)} width={W - PAD.l - PAD.r} height={ys(75) - ys(100)} fill="var(--np-ink)" opacity={0.06} />
-      <rect x={PAD.l} y={ys(25)} width={W - PAD.l - PAD.r} height={ys(0) - ys(25)} fill="var(--np-ink)" opacity={0.06} />
+      <rect x={PAD.l} y={ys(100)} width={W - PAD.l - PAD.r} height={ys(75) - ys(100)} fill="#0b7a45" opacity={0.06} />
+      <rect x={PAD.l} y={ys(25)} width={W - PAD.l - PAD.r} height={ys(0) - ys(25)} fill="#c2321c" opacity={0.06} />
       {ticks.map((t) => (
         <g key={t}>
-          <line x1={PAD.l} x2={W - PAD.r} y1={ys(t)} y2={ys(t)} stroke="var(--np-hair)" strokeDasharray={t === 50 ? "" : "2 4"} />
-          <text x={PAD.l - 6} y={ys(t) + 4} fontSize={10} textAnchor="end" fontFamily="var(--np-sans)" fill="var(--np-ink-3)">
+          <line x1={PAD.l} x2={W - PAD.r} y1={ys(t)} y2={ys(t)} stroke="#cfc5ae" strokeDasharray={t === 50 ? "" : "2 4"} />
+          <text x={PAD.l - 6} y={ys(t) + 4} fontSize={10} textAnchor="end" fontFamily="var(--font-mono)" fill="#8a8272">
             {t}
           </text>
         </g>
       ))}
       {prices.length > 0 &&
         [pmin, (pmin + pmax) / 2, pmax].map((v, i) => (
-          <text key={i} x={W - PAD.r + 6} y={yp(v) + 4} fontSize={10} fontFamily="var(--np-sans)" fill="var(--np-ink-3)">
+          <text key={i} x={W - PAD.r + 6} y={yp(v) + 4} fontSize={10} fontFamily="var(--font-mono)" fill="#8a8272">
             {fmtP(v)}
           </text>
         ))}
       {labelDays.map((d) => (
-        <text key={d} x={x(d)} y={H - 8} fontSize={10} textAnchor="middle" fontFamily="var(--np-sans)" fill="var(--np-ink-3)">
+        <text key={d} x={x(d)} y={H - 8} fontSize={10} textAnchor="middle" fontFamily="var(--font-mono)" fill="#8a8272">
           {new Date(`${d}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" })}
         </text>
       ))}
       {marker && days.includes(marker.day) && (
         <g>
-          <line x1={x(marker.day)} x2={x(marker.day)} y1={PAD.t} y2={H - PAD.b} stroke="var(--np-ink)" strokeDasharray="3 3" />
-          <text x={x(marker.day) - 4} y={PAD.t + 10} fontSize={10} textAnchor="end" fontFamily="var(--np-sans)" fill="var(--np-ink-2)">
+          <line x1={x(marker.day)} x2={x(marker.day)} y1={PAD.t} y2={H - PAD.b} stroke="#16130f" strokeDasharray="3 3" />
+          <text x={x(marker.day) - 4} y={PAD.t + 10} fontSize={10} textAnchor="end" fontFamily="var(--font-mono)" fill="#4a443a">
             {marker.label}
           </text>
         </g>
