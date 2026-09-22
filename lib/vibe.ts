@@ -251,7 +251,7 @@ export function scoreStory(st: { title: string; url: string; publisher: string |
 }
 
 /** The story that moved a company most in the window (most material, strongest tone, newest). */
-function topStory(xs: ToneStory[]): ToneStory | null {
+export function topStory<T extends ToneStory>(xs: T[]): T | null {
   if (!xs.length) return null;
   return [...xs].sort((a, b) => b.w * Math.abs(b.s) - a.w * Math.abs(a.s) || b.publishedAt - a.publishedAt)[0];
 }
@@ -279,7 +279,7 @@ export async function getVibeSummary(now = Date.now()): Promise<VibeSummary> {
     bySymbol[sym] = { now: latest(sym), yesterday: at(sym, addDays(today, -1))?.score ?? null, top: topStory(mine), stories3d: mine.length };
   }
   const recent = stories.filter((s) => s.day >= addDays(today, -1)).map((s) => ({ ...scoreStory(s), symbol: s.symbol }));
-  const lead = (topStory(recent) as (ToneStory & { symbol: string }) | null) ?? null;
+  const lead = topStory(recent);
   return {
     day: today,
     market: { now: latest("_ALL"), yesterday: at("_ALL", addDays(today, -1))?.score ?? null, weekAgo: at("_ALL", addDays(today, -7))?.score ?? null },
@@ -353,4 +353,10 @@ export async function getVibeBoard(now = Date.now()): Promise<VibeBoard> {
 export async function companyStories(symbol: string, days = 3, now = Date.now()): Promise<ToneStory[]> {
   const xs = await readNews(addDays(dayOf(now), -(days - 1)), symbol);
   return xs.map(scoreStory);
+}
+
+/** Every company's stories over the last `days` days, scored, newest first. */
+export async function marketStories(days = 3, now = Date.now()): Promise<(ToneStory & { symbol: string })[]> {
+  const xs = await readNews(addDays(dayOf(now), -(days - 1)));
+  return xs.map((s) => ({ ...scoreStory(s), symbol: s.symbol }));
 }
