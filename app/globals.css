@@ -259,3 +259,28 @@ button { font: inherit; color: inherit; }
 }
 .stamp.picked.up-btn:hover:not(:disabled) { background: var(--up); }
 .stamp.picked.down-btn:hover:not(:disabled) { background: var(--down); }
+
+.fly-rounds { font-size: 12.5px; }
+.fly-rounds summary { cursor: pointer; }
+.fly-rounds ul { margin: 8px 0; padding-left: 16px; display: flex; flex-direction: column; gap: 5px; }
+.fly-rounds a { color: var(--ink); }
+
+/* ipo replay */
+.ipo-progress { display: flex; gap: 6px; flex-wrap: wrap; }
+.ipo-progress span {
+  font-family: var(--font-mono); font-size: 12px; padding: 3px 9px; border: 1.5px solid var(--ink); border-radius: 999px; color: var(--ink-3);
+  border-color: var(--rule);
+}
+.ipo-progress span.done { color: var(--ink); border-color: var(--ink); }
+.ipo-progress span.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.ipo-chapter p { margin: 0 0 10px; }
+.ipo-list { margin: 0 0 12px; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+.ipo-decision { border: 2px solid var(--ink); background: var(--hi); padding: 12px 14px; border-radius: var(--radius); margin-top: 8px; }
+.ipo-result { border: 2px solid var(--ink); background: var(--card); padding: 12px 14px; border-radius: var(--radius); margin-top: 8px; }
+.src { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+.src:hover { color: var(--ink); }
+.bell-banner {
+  display: inline-block; margin: 0 0 12px; padding: 7px 12px; border: 2px solid var(--ink); background: var(--hi);
+  border-radius: var(--radius); color: var(--ink); text-decoration: none; font-size: 14px;
+}
+.bell-banner:hover { background: var(--ink); color: var(--paper); }

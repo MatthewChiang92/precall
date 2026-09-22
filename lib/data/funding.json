@@ -1,0 +1,321 @@
+{
+ "ANDURIL": {
+  "name": "Anduril Industries",
+  "founded": 2017,
+  "blurb": "Defense-technology company that builds autonomous weapons systems, drones, and AI-driven command software (Lattice OS) for the U.S. military and allied governments.",
+  "rounds": [
+   {
+    "date": "2021-06",
+    "label": "Series D",
+    "raisedUsd": 450000000,
+    "valuationUsd": 4600000000,
+    "source": "https://blog.anduril.com/anduril-raises-450-million-in-series-d-funding-671f0a27876b"
+   },
+   {
+    "date": "2022-12",
+    "label": "Series E",
+    "raisedUsd": 1480000000,
+    "valuationUsd": 8500000000,
+    "source": "https://www.washingtontechnology.com/companies/2022/12/anduril-fetches-148b-latest-funding-round/380409/"
+   },
+   {
+    "date": "2024-08-07",
+    "label": "Series F",
+    "raisedUsd": 1500000000,
+    "valuationUsd": 14000000000,
+    "source": "https://www.cnbc.com/2024/08/08/defense-tech-start-up-anduril-industries-valued-at-14-billion.html"
+   },
+   {
+    "date": "2025-06-05",
+    "label": "Series G",
+    "raisedUsd": 2500000000,
+    "valuationUsd": 30500000000,
+    "source": "https://techcrunch.com/2025/06/05/anduril-raises-2-5b-at-30-5b-valuation-led-by-founders-fund/"
+   },
+   {
+    "date": "2026-05",
+    "label": "Series H",
+    "raisedUsd": 5000000000,
+    "valuationUsd": 61000000000,
+    "source": "https://techcrunch.com/2026/05/13/anduril-raises-5b-doubles-valuation-to-61b/"
+   }
+  ]
+ },
+ "ANTHROPIC": {
+  "name": "Anthropic",
+  "founded": 2021,
+  "blurb": "AI safety-oriented research and product company, founded by ex-OpenAI researchers Dario and Daniela Amodei, that develops the Claude family of large language models.",
+  "rounds": [
+   {
+    "date": "2021-05",
+    "label": "Series A",
+    "raisedUsd": 124000000,
+    "valuationUsd": 625000000,
+    "source": "https://www.anthropic.com/news/anthropic-raises-124-million-to-build-more-reliable-general-ai-systems"
+   },
+   {
+    "date": "2023-05",
+    "label": "Series C",
+    "raisedUsd": 450000000,
+    "valuationUsd": 4100000000,
+    "source": "https://news.crunchbase.com/ai-robotics/anthropic-raise-google/"
+   },
+   {
+    "date": "2024-01-21",
+    "label": "Round",
+    "raisedUsd": 2750000000,
+    "valuationUsd": 18400000000,
+    "source": "https://en.wikipedia.org/wiki/Anthropic",
+    "note": "Reported valuation."
+   },
+   {
+    "date": "2025-03-03",
+    "label": "Series E",
+    "raisedUsd": 3500000000,
+    "valuationUsd": 61500000000,
+    "source": "https://techcrunch.com/2025/03/03/anthropic-raises-3-5b-to-fuel-its-ai-ambitions/"
+   },
+   {
+    "date": "2025-09",
+    "label": "Series F",
+    "raisedUsd": 13000000000,
+    "valuationUsd": 183000000000,
+    "source": "https://www.anthropic.com/news/anthropic-raises-series-f-at-usd183b-post-money-valuation"
+   },
+   {
+    "date": "2026-02",
+    "label": "Series G",
+    "raisedUsd": 30000000000,
+    "valuationUsd": 380000000000,
+    "source": "https://www.anthropic.com/news/anthropic-raises-30-billion-series-g-funding-380-billion-post-money-valuation"
+   },
+   {
+    "date": "2026-04",
+    "label": "Series H",
+    "raisedUsd": 65000000000,
+    "valuationUsd": 965000000000,
+    "source": "https://www.anthropic.com/news/series-h"
+   }
+  ]
+ },
+ "FIGUREAI": {
+  "name": "Figure AI",
+  "founded": 2022,
+  "blurb": "Robotics startup developing general-purpose, AI-powered humanoid robots for commercial and industrial work.",
+  "rounds": [
+   {
+    "date": "2024-02",
+    "label": "Series B",
+    "raisedUsd": 675000000,
+    "valuationUsd": 2600000000,
+    "source": "https://www.therobotreport.com/figure-ai-raises-675m-to-commercialize-humanoids/"
+   },
+   {
+    "date": "2025-09",
+    "label": "Series C",
+    "raisedUsd": 1000000000,
+    "valuationUsd": 39000000000,
+    "source": "https://www.prnewswire.com/news-releases/figure-exceeds-1b-in-series-c-funding-at-39b-post-money-valuation-302556936.html"
+   }
+  ]
+ },
+ "KALSHI": {
+  "name": "Kalshi",
+  "founded": 2018,
+  "blurb": "CFTC-regulated exchange where users trade 'event contracts' on the outcomes of real-world events such as elections, economic data, and sports.",
+  "rounds": [
+   {
+    "date": "2025-06",
+    "label": "Series C",
+    "raisedUsd": 185000000,
+    "valuationUsd": 2000000000,
+    "source": "https://news.kalshi.com/p/kalshi-raises-185-million-2-billion-valuation"
+   },
+   {
+    "date": "2025-10",
+    "label": "Series D",
+    "raisedUsd": 300000000,
+    "valuationUsd": 5000000000,
+    "source": "https://news.kalshi.com/p/kalshi-hits-5-billion-valuation-amid-international-expansion"
+   },
+   {
+    "date": "2025-12-02",
+    "label": "Series E",
+    "raisedUsd": 1000000000,
+    "valuationUsd": 11000000000,
+    "source": "https://techcrunch.com/2025/12/02/kalshi-raises-1b-at-11b-valuation-doubling-value-in-under-two-months/"
+   },
+   {
+    "date": "2026-05-07",
+    "label": "Series F",
+    "raisedUsd": 1000000000,
+    "valuationUsd": 22000000000,
+    "source": "https://techcrunch.com/2026/05/07/kalshi-doubles-valuation-in-5-months-hitting-22-billion/"
+   }
+  ]
+ },
+ "NEURALINK": {
+  "name": "Neuralink",
+  "founded": 2016,
+  "blurb": "Neurotechnology company developing implantable brain-computer interfaces intended to let paralyzed people control devices with their thoughts and to treat neurological conditions.",
+  "rounds": [
+   {
+    "date": "2023-08",
+    "label": "Series D",
+    "raisedUsd": 280000000,
+    "valuationUsd": 3500000000,
+    "source": "https://www.mddionline.com/neurological/neuralink-raises-280m-in-financing-while-federal-probes-linger",
+    "note": "Reports vary between ~$3.5B and ~$5B; lower figure shown."
+   },
+   {
+    "date": "2025-06-02",
+    "label": "Series E",
+    "raisedUsd": 650000000,
+    "valuationUsd": 9650000000,
+    "source": "https://neuralink.com/updates/neuralink-raises-650m-series-e/",
+    "note": "Reported ~$9B pre-money plus $650M raised."
+   }
+  ]
+ },
+ "OPENAI": {
+  "name": "OpenAI",
+  "founded": 2015,
+  "blurb": "AI research and product company, creator of ChatGPT and the GPT family of models, originally a nonprofit and now restructured around a capped-profit/public-benefit corporation.",
+  "rounds": [
+   {
+    "date": "2023-01",
+    "label": "Microsoft",
+    "raisedUsd": 10000000000,
+    "valuationUsd": 29000000000,
+    "source": "https://www.cnbc.com/2023/01/10/microsoft-to-invest-10-billion-in-chatgpt-creator-openai-report-says.html",
+    "note": "Widely reported; not confirmed by OpenAI."
+   },
+   {
+    "date": "2024-10-02",
+    "label": "Round",
+    "raisedUsd": 6600000000,
+    "valuationUsd": 157000000000,
+    "source": "https://www.cnbc.com/2024/10/02/openai-raises-at-157-billion-valuation-microsoft-nvidia-join-round.html"
+   },
+   {
+    "date": "2025-03-31",
+    "label": "Round",
+    "raisedUsd": 40000000000,
+    "valuationUsd": 300000000000,
+    "source": "https://www.bloomberg.com/news/articles/2025-03-31/openai-finalizes-40-billion-funding-at-300-billion-valuation"
+   },
+   {
+    "date": "2025-10-02",
+    "label": "Tender offer",
+    "raisedUsd": 6600000000,
+    "valuationUsd": 500000000000,
+    "source": "https://www.cnbc.com/2025/10/02/openai-share-sale-500-billion-valuation.html",
+    "note": "Employee share sale, not new capital."
+   },
+   {
+    "date": "2026-03-31",
+    "label": "Round",
+    "raisedUsd": 122000000000,
+    "valuationUsd": 852000000000,
+    "source": "https://www.bloomberg.com/news/articles/2026-03-31/openai-valued-at-852-billion-after-completing-122-billion-round"
+   }
+  ]
+ },
+ "POLYMARKET": {
+  "name": "Polymarket",
+  "founded": 2020,
+  "blurb": "Crypto-based prediction market platform where users trade shares on the outcome of real-world events (elections, sports, economic data) using stablecoins.",
+  "rounds": [
+   {
+    "date": "2024",
+    "label": "Round",
+    "raisedUsd": 55000000,
+    "valuationUsd": 350000000,
+    "source": "https://www.theblock.co/post/373783/polymarket-discloses-past-funding-rounds-totaling-205-million-before-2-billion-ice-investment"
+   },
+   {
+    "date": "2025",
+    "label": "Round",
+    "raisedUsd": 150000000,
+    "valuationUsd": 1200000000,
+    "source": "https://www.theblock.co/post/373783/polymarket-discloses-past-funding-rounds-totaling-205-million-before-2-billion-ice-investment",
+    "note": "Disclosed retroactively; month not stated."
+   },
+   {
+    "date": "2025-10-07",
+    "label": "ICE deal",
+    "raisedUsd": 2000000000,
+    "valuationUsd": 8000000000,
+    "source": "https://ir.theice.com/press/news-details/2025/ICE-Announces-Strategic-Investment-in-Polymarket/default.aspx",
+    "note": "Valuation is ICE's stated ~$8B pre-investment."
+   },
+   {
+    "date": "2026-09-01",
+    "label": "Round",
+    "raisedUsd": 1000000000,
+    "valuationUsd": 21000000000,
+    "source": "https://www.bloomberg.com/news/articles/2026-08-31/polymarket-funding-round-led-by-1789-values-firm-at-21-billion"
+   }
+  ]
+ },
+ "SPACEX": {
+  "name": "SpaceX",
+  "founded": 2002,
+  "blurb": "Aerospace manufacturer and space-transport company (reusable Falcon 9 rockets, Dragon capsules, Starlink satellite internet, and the Starship vehicle) aiming to cut launch costs and enable Mars colonization.",
+  "rounds": [
+   {
+    "date": "2015-01-20",
+    "label": "Round",
+    "raisedUsd": 1000000000,
+    "valuationUsd": 12000000000,
+    "source": "https://techcrunch.com/2015/01/20/spacex-raises-1-billion-in-new-funding-from-google-and-fidelity/"
+   },
+   {
+    "date": "2019-05-31",
+    "label": "Round",
+    "raisedUsd": 536000000,
+    "valuationUsd": 33300000000,
+    "source": "https://www.cnbc.com/2019/05/31/spacex-valuation-33point3-billion-after-starlink-satellites-fundraising.html"
+   },
+   {
+    "date": "2023-01-03",
+    "label": "Round",
+    "raisedUsd": 750000000,
+    "valuationUsd": 137000000000,
+    "source": "https://www.cnbc.com/2023/01/02/spacex-raising-750-million-at-137-billion-valuation-a16z-investing.html"
+   },
+   {
+    "date": "2023-12-13",
+    "label": "Tender offer",
+    "raisedUsd": null,
+    "valuationUsd": 180000000000,
+    "source": "https://www.bloomberg.com/news/articles/2023-12-13/spacex-value-jumps-closer-to-180-billion-in-tender-offer",
+    "note": "Sale of existing shares, not new capital."
+   },
+   {
+    "date": "2024-12-11",
+    "label": "Tender offer",
+    "raisedUsd": null,
+    "valuationUsd": 350000000000,
+    "source": "https://www.cnbc.com/2024/12/11/spacex-valuation-surges-to-350-billion-as-company-buys-back-stock.html",
+    "note": "Sale of existing shares, not new capital."
+   },
+   {
+    "date": "2025-07-08",
+    "label": "Share sale",
+    "raisedUsd": null,
+    "valuationUsd": 400000000000,
+    "source": "https://www.bloomberg.com/news/articles/2025-07-08/spacex-valuation-said-to-hit-around-400-billion-in-share-sale",
+    "note": "Sale of existing shares, not new capital."
+   },
+   {
+    "date": "2025-12-13",
+    "label": "Tender offer",
+    "raisedUsd": null,
+    "valuationUsd": 800000000000,
+    "source": "https://fortune.com/2025/12/13/spacex-ipo-plan-2026-secondary-offering-insider-share-sale-800-billion-valuation/",
+    "note": "Sale of existing shares, not new capital."
+   }
+  ]
+ }
+}

@@ -1,17 +1,82 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { fmtPct, fmtPrice, jupiterUrl } from "@/lib/format";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { dayLabel, fmtPct, fmtPrice, jupiterUrl } from "@/lib/format";
 
-type Series = {
+export type FlyRound = {
+  date: string; // YYYY-MM or YYYY-MM-DD
+  label: string;
+  valuationUsd: number;
+  raisedUsd: number | null;
+  source: string;
+  note?: string;
+};
+export type FlySeries = {
   symbol: string;
   name: string;
   image: string | null;
   mint: string;
   source: string | null;
   bars: { t: number; c: number }[];
+  rounds: FlyRound[];
+  /** Set when the company has listed: the course ends on the listing day's candle. */
+  listing: { day: string; venue: string } | null;
 };
+type Series = FlySeries;
+
+/** One pipe. Private rounds first, then the token's real daily candles. */
+type Gate =
+  | { kind: "round"; label: string; date: string; v: number; raised: number | null }
+  | { kind: "candle"; t: number; c: number; up: boolean; event?: FlyRound };
+
+const roundT = (d: string) => Date.parse(`${d.length === 4 ? d + "-01" : d}${d.length <= 7 ? "-01" : ""}T00:00:00Z`);
+
+function buildCourse(s: Series): Gate[] {
+  // Rounds before the first candle are pipes; a round raised while the token was
+  // already trading is tagged onto that day's candle, so the course stays in order.
+  const t0 = s.bars.length ? s.bars[0].t : Infinity;
+  const late = s.rounds.filter((r) => roundT(r.date) >= t0);
+  const rounds: Gate[] = s.rounds.filter((r) => roundT(r.date) < t0).map((r) => ({
+    kind: "round",
+    label: r.label,
+    date: r.date,
+    v: r.valuationUsd,
+    raised: r.raisedUsd,
+  }));
+  const candles: Gate[] = s.bars.map((b, i) => ({
+    kind: "candle",
+    t: b.t,
+    c: b.c,
+    up: i === 0 ? true : b.c >= s.bars[i - 1].c,
+    event: late.find((r) => {
+      const t = roundT(r.date);
+      return t >= b.t && (i + 1 >= s.bars.length || t < s.bars[i + 1].t);
+    }),
+  }));
+  return [...rounds, ...candles];
+}
+
+export function fmtUsdBig(n: number): string {
+  const u: [number, string][] = [
+    [1e12, "T"],
+    [1e9, "B"],
+    [1e6, "M"],
+    [1e3, "K"],
+  ];
+  for (const [d, k] of u)
+    if (n >= d) {
+      const x = n / d;
+      return "$" + (x >= 100 ? x.toFixed(0) : x >= 10 ? x.toFixed(1).replace(/\.0$/, "") : x.toFixed(2).replace(/\.?0+$/, "")) + k;
+    }
+  return "$" + n.toFixed(0);
+}
+
+export function fmtRoundDate(d: string): string {
+  const [y, m] = d.split("-");
+  if (!m) return y;
+  return new Date(`${y}-${m}-01T00:00:00Z`).toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
+}
 type Phase = "ready" | "playing" | "dead" | "won";
 
 // Logical canvas size; scaled to the container with devicePixelRatio.
@@ -27,7 +92,7 @@ const FLAP = -430; // px/s
 const R = 17; // bird radius
 const BIRD_X = 110;
 const STEP = 1 / 120; // fixed physics step
-const BEST_KEY = "precall.fly.best";
+const BEST_KEY = "precall.fly.best.v2"; // v2: courses now start at the first funding round
 // Largest gap-to-gap move, in px, between two pipes (up is harder than down).
 const MAX_CLIMB = 150;
 const MAX_DROP = 210;
@@ -43,7 +108,23 @@ const C = {
   down: "#c2321c",
   downBg: "#f6d9d1",
   hi: "#f3d43b",
+  round: "#8a6d00",
+  roundBg: "#f7e8a6",
 };
+
+const dayFmt = (t: number, year = true) =>
+  new Date(t).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    ...(year ? { year: "numeric" } : {}),
+    timeZone: "UTC",
+  });
+
+function gateLine(g: Gate): string {
+  return g.kind === "round"
+    ? `${g.label} · ${fmtRoundDate(g.date)} · valued ${fmtUsdBig(g.v)}`
+    : `${dayFmt(g.t)} · token ${fmtPrice(g.c)}`;
+}
 
 interface World {
   y: number;
@@ -54,15 +135,22 @@ interface World {
   t: number;
 }
 
-function gapCenters(bars: { c: number }[]): number[] {
-  const cs = bars.map((b) => b.c);
-  const min = Math.min(...cs);
-  const max = Math.max(...cs);
+function scale(vals: number[], top: number, bottom: number): number[] {
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
   const span = max - min || 1;
-  const top = 40 + GAP / 2;
+  // Higher value = higher on screen (smaller y), like a chart.
+  return vals.map((v) => bottom - ((v - min) / span) * (bottom - top));
+}
+
+function gapCenters(course: Gate[]): number[] {
+  const top = 40 + GAP / 2 + 30; // room for the round tags above the gap
   const bottom = H - GROUND - 40 - GAP / 2;
-  // Higher price = higher on screen (smaller y), like a chart.
-  const raw = cs.map((c) => bottom - ((c - min) / span) * (bottom - top));
+  // Private rounds climb on a log scale (Seed to $100B+ would flatten linearly);
+  // the token's candles use the full height on a linear price scale.
+  const rv = course.flatMap((g) => (g.kind === "round" ? [Math.log10(g.v)] : []));
+  const cv = course.flatMap((g) => (g.kind === "candle" ? [g.c] : []));
+  const raw = [...(rv.length ? scale(rv, top, bottom) : []), ...(cv.length ? scale(cv, top, bottom) : [])];
   // Ease each gap toward the real close, never faster than a bird can follow
   // between two pipes, so a violent candle bends the course without making it
   // physically impossible. The overall shape of the chart is preserved.
@@ -130,9 +218,10 @@ function Game({
   const [score, setScore] = useState(0);
   const phaseRef = useRef<Phase>("ready");
   const logo = useRef<HTMLImageElement | null>(null);
+  const course = useMemo(() => buildCourse(s), [s]);
   const world = useRef<World>(null as unknown as World);
   if (world.current === null) {
-    const gaps = gapCenters(s.bars);
+    const gaps = gapCenters(course);
     world.current = { y: gaps[0], vy: 0, x: 0, passed: 0, gaps, t: 0 };
   }
 
@@ -145,10 +234,10 @@ function Game({
   }, [s.image]);
 
   const reset = useCallback(() => {
-    const gaps = gapCenters(s.bars);
+    const gaps = gapCenters(course);
     world.current = { y: gaps[0], vy: 0, x: 0, passed: 0, gaps, t: 0 };
     setScore(0);
-  }, [s]);
+  }, [course]);
 
   const end = useCallback(
     (won: boolean) => {
@@ -210,7 +299,8 @@ function Game({
     let raf = 0;
     let last = performance.now();
     let acc = 0;
-    const n = s.bars.length;
+    const n = course.length;
+    const nRounds = course.filter((g) => g.kind === "round").length;
 
     const stepPhysics = (dt: number) => {
       const w = world.current!;
@@ -250,6 +340,25 @@ function Game({
         const hitBot = Math.hypot(BIRD_X - nx, w.y - Math.max(w.y, botY)) < R;
         if (hitTop || hitBot) return end(false);
       }
+    };
+
+    const marker = (x: number, text: string, color: string) => {
+      ctx.save();
+      ctx.setLineDash([8, 6]);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(x, 110);
+      ctx.lineTo(x, H - GROUND);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.translate(x - 8, H - GROUND - 12);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillStyle = color;
+      ctx.font = `900 16px ${fDisplay}`;
+      ctx.textAlign = "left";
+      ctx.fillText(text, 0, 0);
+      ctx.restore();
     };
 
     const draw = () => {
@@ -294,10 +403,10 @@ function Game({
       ) {
         const px = pipeX(i, w.x);
         if (px > W || px + PIPE_W < 0) continue;
-        const up = i === 0 ? true : s.bars[i].c >= s.bars[i - 1].c;
+        const gate = course[i];
         const g = w.gaps[i];
-        const fill = up ? C.upBg : C.downBg;
-        const edge = up ? C.up : C.down;
+        const fill = gate.kind === "round" ? C.roundBg : gate.up ? C.upBg : C.downBg;
+        const edge = gate.kind === "round" ? C.round : gate.up ? C.up : C.down;
         const rects: [number, number][] = [
           [0, g - GAP / 2],
           [g + GAP / 2, H - GROUND - (g + GAP / 2)],
@@ -320,7 +429,33 @@ function Game({
         ctx.fillStyle = C.ink;
         ctx.fillRect(px - 4, g - GAP / 2 - 10, PIPE_W + 8, 10);
         ctx.fillRect(px - 4, g + GAP / 2, PIPE_W + 8, 10);
+        // funding-round tag: stage + post-money valuation, pinned above the gap
+        const tag = gate.kind === "round" ? { label: gate.label, v: gate.v } : gate.event ? { label: gate.event.label, v: gate.event.valuationUsd } : null;
+        if (tag) {
+          const tw = 92;
+          const ty = g - GAP / 2 - 52;
+          ctx.fillStyle = C.card;
+          ctx.fillRect(px + PIPE_W / 2 - tw / 2, ty, tw, 36);
+          ctx.strokeStyle = C.ink;
+          ctx.lineWidth = 2;
+          ctx.strokeRect(px + PIPE_W / 2 - tw / 2, ty, tw, 36);
+          ctx.fillStyle = C.ink;
+          ctx.textAlign = "center";
+          ctx.font = `900 13px ${fDisplay}`;
+          ctx.fillText(tag.label.toUpperCase().slice(0, 14), px + PIPE_W / 2, ty + 15);
+          ctx.font = `600 11px ${fMono}`;
+          ctx.fillText(fmtUsdBig(tag.v), px + PIPE_W / 2, ty + 30);
+        }
       }
+
+      // the moment the PreStocks token went live: between the last round and first candle
+      if (nRounds > 0 && nRounds < n) {
+        const lx = (pipeX(nRounds - 1, w.x) + PIPE_W + pipeX(nRounds, w.x)) / 2;
+        if (lx > -40 && lx < W + 40) marker(lx, "PRESTOCKS TOKEN · ON-CHAIN", C.ink);
+      }
+      // finish: the listing bell, or an open question
+      const fx = pipeX(n, w.x) + PIPE_W / 2 - SPACING / 2 + 40;
+      if (fx > -40 && fx < W + 40) marker(fx, s.listing ? `IPO · ${s.listing.venue}` : "IPO: NOT YET", s.listing ? C.up : C.down);
 
       // ground
       ctx.fillStyle = C.ink;
@@ -377,13 +512,7 @@ function Game({
       ctx.textAlign = "center";
       ctx.fillText(String(w.passed), W / 2, 70);
       ctx.font = `500 12px ${fMono}`;
-      const d = new Date(s.bars[idx].t).toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-        timeZone: "UTC",
-      });
-      ctx.fillText(`${d} · ${fmtPrice(s.bars[idx].c)}`, W / 2, 92);
+      ctx.fillText(gateLine(course[idx]), W / 2, 92);
     };
 
     const frame = (now: number) => {
@@ -398,10 +527,29 @@ function Game({
     };
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
-  }, [s, end]);
+  }, [s, course, end]);
 
-  const from = s.bars[0];
-  const reached = s.bars[Math.min(s.bars.length - 1, Math.max(0, score))];
+  const firstRound = course.find((g) => g.kind === "round");
+  const firstCandle = course.find((g) => g.kind === "candle");
+  const at = course[Math.min(course.length - 1, Math.max(0, score - 1))];
+  const lastRound = [...course.slice(0, Math.max(1, score))].reverse().find((g) => g.kind === "round");
+
+  let story: React.ReactNode = null;
+  if (at && at.kind === "round" && firstRound && firstRound.kind === "round")
+    story = (
+      <>
+        You got {s.name} to its {at.label} ({fmtRoundDate(at.date)}), valued {fmtUsdBig(at.v)}
+        {at !== firstRound && <> — <b className="up">{fmtMultiple(at.v / firstRound.v)}</b> its {firstRound.label} valuation</>}.
+      </>
+    );
+  else if (at && at.kind === "candle" && firstCandle && firstCandle.kind === "candle")
+    story = (
+      <>
+        {lastRound && lastRound.kind === "round" && <>Past every private round to {fmtUsdBig(lastRound.v)}, then </>}
+        {lastRound ? "t" : "T"}he token from {dayFmt(firstCandle.t, false)} to {dayFmt(at.t, false)}:{" "}
+        <b className={at.c >= firstCandle.c ? "up" : "down"}>{fmtPct(at.c / firstCandle.c - 1, 1)}</b>
+      </>
+    );
 
   return (
     <div
@@ -428,41 +576,34 @@ function Game({
           if (phase === "dead" || phase === "won") return;
           flap();
         }}
-        aria-label={`Fly the ${s.name} chart. Tap or press space to flap.`}
+        aria-label={`Fly ${s.name} from its first funding round to ${s.listing ? "its IPO" : "today"}. Tap or press space to flap.`}
         role="img"
       />
       {phase === "ready" && (
         <div className="fly-overlay" style={{ pointerEvents: "none" }}>
-          <div className="t-name">Fly {s.name}</div>
-          <div className="mono" style={{ fontSize: 12 }}>
-            {s.bars.length} real daily candles · tap / space to flap
+          <div className="t-name">{s.name}: seed to IPO</div>
+          <div className="mono" style={{ fontSize: 12, maxWidth: 300 }}>
+            {course.filter((g) => g.kind === "round").length} funding rounds, then {s.bars.length} real daily token candles
+            {s.listing ? " to the listing bell" : ""} · tap / space to flap
           </div>
         </div>
       )}
       {(phase === "dead" || phase === "won") && (
         <div className="fly-overlay">
           <div className="kicker">
-            {phase === "won" ? "You flew the whole chart" : "Crashed"}
+            {phase === "won" ? (s.listing ? `Bell rung · ${s.listing.venue}` : "You reached today") : "Crashed"}
           </div>
           <div className="big-num">{score}</div>
-          <div className="mono" style={{ fontSize: 12.5, maxWidth: 300 }}>
-            You flew {s.name} from{" "}
-            {new Date(from.t).toLocaleDateString("en-GB", {
-              day: "numeric",
-              month: "short",
-              timeZone: "UTC",
-            })}{" "}
-            to{" "}
-            {new Date(reached.t).toLocaleDateString("en-GB", {
-              day: "numeric",
-              month: "short",
-              timeZone: "UTC",
-            })}
-            :{" "}
-            <b className={reached.c >= from.c ? "up" : "down"}>
-              {fmtPct(reached.c / from.c - 1, 1)}
-            </b>
+          <div className="mono" style={{ fontSize: 12.5, maxWidth: 320 }}>
+            {story}
           </div>
+          {phase === "won" && (
+            <div className="mono" style={{ fontSize: 12.5, maxWidth: 320, marginTop: 6 }}>
+              {s.listing
+                ? `${s.name} listed on ${dayLabel(s.listing.day, { day: "numeric", month: "short", year: "numeric" })}. See what the bell did to the token.`
+                : `${s.name} hasn't IPO'd yet. Nobody knows how its flight ends.`}
+            </div>
+          )}
           <div
             style={{
               display: "flex",
@@ -475,14 +616,24 @@ function Game({
             <button className="btn" type="button" onClick={restart} autoFocus>
               Fly again
             </button>
-            <Link className="btn ghost" href="/">
-              Call {s.symbol} for tomorrow
-            </Link>
+            {s.listing ? (
+              <Link className="btn ghost" href="/ipo">
+                Replay the IPO →
+              </Link>
+            ) : (
+              <Link className="btn ghost" href="/">
+                Call {s.symbol} for tomorrow
+              </Link>
+            )}
           </div>
         </div>
       )}
     </div>
   );
+}
+
+function fmtMultiple(x: number): string {
+  return x >= 10 ? `${Math.round(x).toLocaleString("en-US")}×` : `${x.toFixed(1)}×`;
 }
 
 function Sidebar({
@@ -549,11 +700,30 @@ function Sidebar({
         ))}
       </div>
       <p className="muted" style={{ margin: 0, fontSize: 13 }}>
-        Each pipe is one real on-chain daily candle: the gap follows that
-        day&apos;s close, green if it closed up, red if down. A rally lifts the
-        gaps, a dump drops them; on violent days the gap eases toward the close
-        so every chart stays flyable. Numbers are your best run per company.
+        <b>Gold pipes are real funding rounds</b>, climbing with the company&apos;s
+        valuation (log scale). Then come the PreStocks token&apos;s{" "}
+        <b>real on-chain daily candles</b>: the gap follows the
+        close, green up, red down. On violent days the gap eases toward the
+        close so every course stays flyable. Numbers are your best run.
       </p>
+      <details className="fly-rounds">
+        <summary className="kicker">
+          {s.name}&apos;s rounds &amp; sources ({s.rounds.length})
+        </summary>
+        <ul>
+          {s.rounds.map((r) => (
+            <li key={r.date + r.label}>
+              <span className="mono">{fmtRoundDate(r.date)}</span> · {r.label} · <b>{fmtUsdBig(r.valuationUsd)}</b>
+              {r.raisedUsd ? <> · raised {fmtUsdBig(r.raisedUsd)}</> : null}{" "}
+              <a href={r.source} target="_blank" rel="noreferrer">
+                source
+              </a>
+              {r.note && <div className="muted">{r.note}</div>}
+            </li>
+          ))}
+        </ul>
+        <div className="muted">Valuations as reported (post-money unless noted). Rounds without a reported valuation are left out.</div>
+      </details>
       <a
         className="btn ghost"
         href={jupiterUrl(s.mint)}
