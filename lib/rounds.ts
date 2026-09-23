@@ -13,7 +13,7 @@ import {
   sourceAvailable,
 } from "./prices";
 import { refreshVibe } from "./vibe";
-import { DAY_MS, HISTORY_DAYS, LAUNCH_DAY, addDays, clock, dayStart, settleable } from "./time";
+import { DAY_MS, HISTORY_WEEKS, LAUNCH_DAY, WEEK_MS, addDays, clock, dayStart, settleable } from "./time";
 
 /** A move smaller than this (0.01%) is a push: nobody wins or loses it. */
 export const FLAT_EPS = 1e-4;
@@ -28,29 +28,35 @@ export function classify(ret: number): Result {
   return ret > 0 ? "UP" : "DOWN";
 }
 
-/** Days that should have results by now: recent history plus every round since launch. */
+/** Weeks that should have results by now: recent history plus every round since launch. */
 function daysToSettle(now: number): string[] {
   const { lastClosedDay } = clock(now);
-  const launchHistory = addDays(LAUNCH_DAY, -HISTORY_DAYS);
-  const recent = addDays(lastClosedDay, -HISTORY_DAYS + 1);
+  const launchHistory = addDays(LAUNCH_DAY, -7 * HISTORY_WEEKS);
+  const recent = addDays(lastClosedDay, -7 * (HISTORY_WEEKS - 1));
   const from = launchHistory < recent ? launchHistory : recent;
   const out: string[] = [];
-  for (let d = from; d <= lastClosedDay; d = addDays(d, 1)) if (settleable(d, now)) out.push(d);
+  for (let d = from; d <= lastClosedDay; d = addDays(d, 7)) if (settleable(d, now)) out.push(d);
   return out;
 }
 
 /**
- * Settle every closed day that is missing a result for any listed token.
- * Results are INSERT-only: once a (day, token) is settled it never changes.
+ * Settle every closed week that is missing a result for any listed token.
+ * Results are INSERT-only: once a (week, token) is settled it never changes.
  * Both the open and the close come from ONE fresh fetch of ONE source, so a
- * round never compares prices from two different feeds.
+ * round never compares prices from two different feeds. Daily bars, because
+ * GMGN serves only the last ~100 bars: 100 hourly bars do not reach back a week.
  */
 export async function settlePending(now = Date.now()): Promise<{ settled: number; pending: number }> {
   const days = daysToSettle(now);
   if (!days.length) return { settled: 0, pending: 0 };
   if (!(await claim("settle", 600))) return { settled: 0, pending: -1 };
 
-  const tokens = await sql`select symbol, mint from tokens order by symbol`;
+  // A week that opened before a token's first stored daily bar can never be priced
+  // (history does not grow backwards), so it gets no result instead of staying pending.
+  const tokens = await sql`
+    select k.symbol, k.mint, extract(epoch from min(c.t)) * 1000 as first_bar
+    from tokens k left join candles c on c.mint = k.mint and c.res = '1d'
+    group by k.symbol, k.mint order by k.symbol`;
   const done = await sql`
     select day::text as day, symbol from round_results where day >= ${days[0]}::date`;
   const have = new Set(done.map((r) => `${r.day}|${r.symbol}`));
@@ -60,15 +66,18 @@ export async function settlePending(now = Date.now()): Promise<{ settled: number
   const notes: string[] = [];
 
   for (const tk of tokens) {
-    const missing = days.filter((d) => !have.has(`${d}|${tk.symbol}`));
+    const firstBar = tk.first_bar === null ? null : Number(tk.first_bar);
+    const missing = days.filter(
+      (d) => !have.has(`${d}|${tk.symbol}`) && (firstBar === null || dayStart(d) >= firstBar + DAY_MS),
+    );
     if (!missing.length) continue;
 
     const series = new Map<Source, Bar[] | null>();
     const getSeries = async (s: Source) => {
       if (!series.has(s)) {
         try {
-          series.set(s, await fetchAndStore(tk.mint, "1h", s));
-          if (s === PRIMARY) await touch(`bars:1h:${tk.mint}`);
+          series.set(s, await fetchAndStore(tk.mint, "1d", s));
+          if (s === PRIMARY) await touch(`bars:1d:${tk.mint}`);
         } catch (e) {
           notes.push(`${tk.symbol}/${s}: ${String(e).slice(0, 120)}`);
           series.set(s, null);
@@ -79,7 +88,7 @@ export async function settlePending(now = Date.now()): Promise<{ settled: number
 
     for (const day of missing) {
       const t0 = dayStart(day);
-      const t1 = t0 + DAY_MS;
+      const t1 = t0 + WEEK_MS;
       let row: { open: number; close: number; source: Source } | null = null;
       for (const s of [PRIMARY, FALLBACK]) {
         if (!sourceAvailable(s)) continue;
@@ -88,8 +97,8 @@ export async function settlePending(now = Date.now()): Promise<{ settled: number
         // A pool-level series (gecko) that stopped trading says nothing about the
         // token, which may trade in other pools. Token-level (gmgn) silence is a real flat.
         if (s === "gecko" && (bars.at(-1)?.t ?? 0) < t1 - POOL_STALE_MS) continue;
-        const open = priceAt(bars, t0);
-        const close = priceAt(bars, t1);
+        const open = priceAt(bars, t0, "1d");
+        const close = priceAt(bars, t1, "1d");
         if (open !== null && close !== null) {
           row = { open, close, source: s };
           break;
@@ -117,7 +126,7 @@ export async function settlePending(now = Date.now()): Promise<{ settled: number
 /** Everything the site needs kept warm. Safe to call from any request; all steps are throttled. */
 export async function refreshAll(now = Date.now(), newsBudgetMs = 45_000) {
   await refreshRegistry();
-  // Settle first: it fetches fresh hourly series and marks them, so the display
+  // Settle first: it fetches fresh daily series and marks them, so the display
   // refresh below does not fetch the same data twice.
   const out = await settlePending(now);
   const tokens = await sql`select mint from tokens where last_seen > now() - interval '1 day'`;

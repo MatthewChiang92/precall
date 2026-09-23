@@ -105,7 +105,7 @@ export interface MyDay {
 export async function myState(pid: string, now = Date.now()) {
   if (!isPid(pid)) throw new GameError("bad player id");
   const c = clock(now);
-  const from = addDays(c.liveDay, -30);
+  const from = addDays(c.liveDay, -7 * 8);
   const [player, calls, scoredRows, crowd] = await Promise.all([
     sql`select name from players where id = ${pid}::uuid`,
     sql`select day::text as day, symbol, dir from calls
@@ -131,10 +131,10 @@ export async function myState(pid: string, now = Date.now()) {
   const openCrowd: Record<string, Crowd> = {};
   for (const [sym, v] of Object.entries(crowd[c.openDay] ?? {})) if (mineOpen[sym]) openCrowd[sym] = v;
 
-  // Streak: consecutive rounds played, counting back from the newest round you have called.
+  // Streak: consecutive weekly rounds played, counting back from the newest round you have called.
   const played = (d: string) => Boolean(days[d] && Object.keys(days[d].calls).length);
   let streak = 0;
-  for (let d = played(c.openDay) ? c.openDay : c.liveDay; played(d); d = addDays(d, -1)) streak++;
+  for (let d = played(c.openDay) ? c.openDay : c.liveDay; played(d); d = addDays(d, -7)) streak++;
 
   return {
     name: (player[0]?.name as string | null) ?? null,

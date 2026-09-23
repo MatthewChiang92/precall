@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { listTokens } from "@/lib/prestocks";
 
-export const alt = "PreCall: call tomorrow's pre-IPO market. Daily UP/DOWN calls on PreStocks tokens, settled on Solana.";
+export const alt = "PreCall: call next week's pre-IPO market. Weekly UP/DOWN calls on PreStocks tokens, settled on Solana.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const revalidate = 3600;
@@ -29,10 +29,10 @@ export default async function Image() {
       <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: PAPER, color: INK, padding: "52px 64px", fontFamily: "Mono" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `5px solid ${INK}`, paddingBottom: 14 }}>
           <div style={{ fontFamily: "Display", fontSize: 64, letterSpacing: 1 }}>PRECALL</div>
-          <div style={{ fontSize: 22, letterSpacing: 3 }}>THE DAILY PRE-IPO CALL · ON SOLANA</div>
+          <div style={{ fontSize: 22, letterSpacing: 3 }}>THE WEEKLY PRE-IPO CALL · ON SOLANA</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", marginTop: 26, fontFamily: "Display", fontSize: 108, lineHeight: 0.9 }}>
-          <div style={{ display: "flex" }}>CALL TOMORROW&apos;S</div>
+          <div style={{ display: "flex" }}>CALL NEXT WEEK&apos;S</div>
           <div style={{ display: "flex" }}>
             <span style={{ background: HI, padding: "0 10px" }}>PRE-IPO</span>
             <span style={{ marginLeft: 26 }}>MARKET.</span>
@@ -61,7 +61,7 @@ export default async function Image() {
           ))}
         </div>
         <div style={{ display: "flex", marginTop: "auto", fontSize: 22 }}>
-          UP or DOWN on every PreStocks token · locks 00:00 UTC · settled on-chain · free
+          UP or DOWN on every PreStocks token · locks Monday 00:00 UTC · settled on-chain · free
         </div>
       </div>
     ),

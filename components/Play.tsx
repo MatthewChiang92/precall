@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Board, BoardToken } from "@/lib/state";
-import { countdown, dayLabel, fmtPct, fmtPrice, signClass } from "@/lib/format";
+import { countdown, dayLabel, fmtPct, fmtPrice, signClass, weekLabel } from "@/lib/format";
+import { LAUNCH_DAY } from "@/lib/time";
 import { band } from "@/lib/vibe-model";
 import type { VibeSummary } from "@/lib/vibe";
 import { BuyButton } from "./BuyButton";
@@ -30,7 +31,7 @@ interface Me {
   openCalledToday: number;
 }
 
-const LAUNCH_MS = Date.parse("2026-09-22T00:00:00Z");
+const LAUNCH_MS = Date.parse(`${LAUNCH_DAY}T00:00:00Z`);
 
 export function Play({ initial }: { initial: Board }) {
   const pid = usePlayer();
@@ -85,7 +86,7 @@ export function Play({ initial }: { initial: Board }) {
     return () => clearInterval(id);
   }, [loadBoard]);
 
-  // Round rollover at 00:00 UTC: refetch everything once.
+  // Round rollover at Monday 00:00 UTC: refetch everything once.
   const rolled = useRef(false);
   useEffect(() => {
     if (now >= board.lockAt && !rolled.current) {
@@ -131,7 +132,7 @@ export function Play({ initial }: { initial: Board }) {
         return n;
       });
       if (calledCount + (myOpen[symbol] ? 0 : 1) === board.tokens.length && !myOpen[symbol]) {
-        flash("Slip complete. Come back after 00:00 UTC to watch it play out.");
+        flash("Slip complete. It locks Monday 00:00 UTC, then plays out over the week.");
       }
     } catch (e) {
       setPending((p) => {
@@ -152,7 +153,7 @@ export function Play({ initial }: { initial: Board }) {
   }, [board.liveCrowd]);
 
   const lockIn = board.lockAt - now;
-  const localLock = new Date(board.lockAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const localLock = new Date(board.lockAt).toLocaleString([], { weekday: "short", hour: "2-digit", minute: "2-digit" });
 
   return (
     <>
@@ -160,19 +161,19 @@ export function Play({ initial }: { initial: Board }) {
       <section className="hero">
         <div>
           <div className="kicker">
-            Round №{board.openRound} · {dayLabel(board.openDay)} · {board.tokens.length} pre-IPO tokens
+            Round №{board.openRound} · {weekLabel(board.openDay)} · {board.tokens.length} pre-IPO tokens
           </div>
           <h1 className="h-display">
-            Call tomorrow&apos;s
+            Call next week&apos;s
             <br />
             <span className="hl">pre-IPO</span> market.
           </h1>
           <p className="hero-lede">
-            Every day, call <b>UP</b> or <b>DOWN</b> on every{" "}
+            Every week, call <b>UP</b> or <b>DOWN</b> on every{" "}
             <a href="https://prestocks.com" target="_blank" rel="noreferrer">
               PreStocks
             </a>{" "}
-            token: OpenAI, Anthropic, SpaceX and the rest. Calls lock at <b>00:00 UTC</b> and settle 24 hours later on{" "}
+            token: OpenAI, Anthropic, SpaceX and the rest. Calls lock <b>Monday 00:00 UTC</b> and settle a week later on{" "}
             <b>on-chain Solana prices</b>. Beat the crowd for double points.
           </p>
           <div className="clockbox" suppressHydrationWarning>
@@ -182,7 +183,7 @@ export function Play({ initial }: { initial: Board }) {
             <span className="l" suppressHydrationWarning>
               until calls lock
               <br />
-              00:00 UTC · {localLock} your time
+              Mon 00:00 UTC · {localLock} your time
             </span>
           </div>
         </div>
@@ -452,10 +453,10 @@ function LiveRound({ board, mine, crowd }: { board: Board; mine: Record<string, 
     <section className="section">
       <div className="section-head">
         <h2 className="h-section">
-          Live · {board.liveRound >= 1 ? `Round №${board.liveRound}` : "Warm-up"} <span className="muted" style={{ fontSize: 18 }}>{dayLabel(board.liveDay)}</span>
+          Live · {board.liveRound >= 1 ? `Round №${board.liveRound}` : "Warm-up"} <span className="muted" style={{ fontSize: 18 }}>{weekLabel(board.liveDay)}</span>
         </h2>
         <span className="kicker">
-          locked 00:00 UTC · settles 00:00 UTC tomorrow ·{" "}
+          locked {dayLabel(board.liveDay)} 00:00 UTC · settles {dayLabel(board.openDay)} 00:00 UTC ·{" "}
           {called ? (
             <>
               you&apos;re <span className="up">winning {winning}</span> / <span className="down">losing {losing}</span> right now
@@ -527,7 +528,7 @@ function Results({ board, me, flash }: { board: Board; me: Me | null; flash: (m:
     const scored = [...(myLast.scored ?? [])].sort((a, b) => order.indexOf(a.symbol) - order.indexOf(b.symbol));
     const grid = scored.map((s) => (s.result === "FLAT" || s.result === "VOID" ? "⬜" : s.correct ? "🟩" : "🟥")).join("");
     const round = board.history.find((h) => h.day === myLast.day)?.round;
-    const text = `PreCall №${round ?? ""} · ${myLast.correct ?? 0}/${myLast.decided ?? 0} right · ${myLast.points ?? 0} pts\n${grid}\nCall tomorrow's pre-IPO market: ${location.origin}`;
+    const text = `PreCall №${round ?? ""} · ${myLast.correct ?? 0}/${myLast.decided ?? 0} right · ${myLast.points ?? 0} pts\n${grid}\nCall next week's pre-IPO market: ${location.origin}`;
     try {
       if (navigator.share) await navigator.share({ text });
       else {
@@ -541,13 +542,13 @@ function Results({ board, me, flash }: { board: Board; me: Me | null; flash: (m:
     <section className="section">
       <div className="section-head">
         <h2 className="h-section">Results</h2>
-        <span className="kicker">settled on on-chain prices · 00:00 → 00:00 UTC</span>
+        <span className="kicker">settled on on-chain prices · Mon 00:00 → Mon 00:00 UTC</span>
       </div>
 
       {myLast ? (
         <div className="panel" style={{ marginBottom: 14, display: "flex", gap: 18, flexWrap: "wrap", alignItems: "center" }}>
           <div>
-            <div className="kicker">Your round · {dayLabel(myLast.day)}</div>
+            <div className="kicker">Your round · {weekLabel(myLast.day)}</div>
             <div className="big-num">
               {myLast.correct ?? 0}/{myLast.decided ?? 0}
             </div>
@@ -579,7 +580,7 @@ function Results({ board, me, flash }: { board: Board; me: Me | null; flash: (m:
           {board.history.map((h) => (
             <div className="daycard" key={h.day}>
               <h4>
-                {dayLabel(h.day)} {h.round >= 1 && <span className="muted">№{h.round}</span>}
+                {weekLabel(h.day)} {h.round >= 1 && <span className="muted">№{h.round}</span>}
               </h4>
               {board.tokens.map((t) => {
                 const r = h.results[t.symbol];
@@ -595,7 +596,7 @@ function Results({ board, me, flash }: { board: Board; me: Me | null; flash: (m:
           ))}
         </div>
       ) : (
-        <div className="empty">No settled days yet.</div>
+        <div className="empty">No settled weeks yet.</div>
       )}
     </section>
   );

@@ -11,9 +11,10 @@ export default function How() {
 
       <h2>The game</h2>
       <p>
-        Every UTC day is a round. Before it starts, you call <b>UP</b> or <b>DOWN</b> on each PreStocks token. The round
-        <b> locks at 00:00 UTC</b>: the opening price is taken, and no call can be added or changed after that (the server
-        enforces this, not your browser). It <b>settles at the next 00:00 UTC</b> against the closing price.
+        Every UTC week, Monday to Monday, is a round. Before it starts, you call <b>UP</b> or <b>DOWN</b> on each PreStocks
+        token. The round <b>locks at Monday 00:00 UTC</b>: the opening price is taken, and no call can be added or changed
+        after that (the server enforces this, not your browser). It <b>settles at the next Monday 00:00 UTC</b> against the
+        closing price. A week, not a day, because a single day&apos;s move on a thinly traded pre-IPO token is mostly noise.
       </p>
       <ul>
         <li>Correct call: <b>1 point</b>.</li>
@@ -21,7 +22,7 @@ export default function How() {
           Correct <i>and</i> contrarian (your side had under half of that token&apos;s calls): <b>2 points</b>.
         </li>
         <li>Wrong: 0. A move under 0.01% is a <b>push</b> and counts neither way.</li>
-        <li>Your streak is the number of consecutive rounds you have played.</li>
+        <li>Your streak is the number of consecutive weekly rounds you have played.</li>
       </ul>
       <p>
         You see the crowd&apos;s split on a token only after you have called it yourself, so nobody can just copy the herd.
@@ -37,14 +38,16 @@ export default function How() {
 
       <h2>The prices</h2>
       <p>
-        Results use <b>on-chain Solana trades</b>, not a quoted mark. The price at an instant is the close of the last hourly
-        bar that finished at or before it; an hour with no trades carries the last trade forward. The primary feed is GMGN,
+        Results use <b>on-chain Solana trades</b>, not a quoted mark. The price at Monday 00:00 UTC is the close of the last
+        daily bar that finished at or before it, which is the last trade before midnight; a day with no trades carries the
+        last trade forward. The primary feed is GMGN,
         which aggregates every pool for a token; GeckoTerminal (the most-traded pool) is the fallback. The open and the close
         of a round always come from <b>one fetch of one feed</b>, and each result records which feed it used.
       </p>
       <p>
-        A settled result is written once and never edited. If prices for a day cannot be proven (for example, a feed is down),
-        the day stays <i>pending</i> rather than being guessed, and calls on it score nothing until it settles.
+        A settled result is written once and never edited. If prices for a week cannot be proven (for example, a feed is
+        down), the week stays <i>pending</i> rather than being guessed, and calls on it score nothing until it settles. A
+        token that had not started trading when a round locked gets no result for that round.
       </p>
       <p>
         The &ldquo;vs PreStocks mark&rdquo; figure on each ticket compares the token price with the PreStocks mark price, both
@@ -100,8 +103,8 @@ export default function How() {
 
       <h2>Rewind</h2>
       <p>
-        Rewind is an instant practice mode on real past daily closes. It has no effect on the leaderboard. A &ldquo;day&rdquo;
-        there is the next daily bar, which can skip calendar days with no trades.
+        Rewind is an instant practice mode on real past weekly closes, taken at the same Monday 00:00 UTC instants as the
+        game. It has no effect on the leaderboard. A week with no trades repeats the previous close.
       </p>
 
       <h2>Seed to IPO</h2>

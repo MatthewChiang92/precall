@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { dayLabel } from "@/lib/format";
 import { leaderboard } from "@/lib/game";
+import { LAUNCH_DAY, addDays } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Leaders · PreCall" };
@@ -13,7 +15,7 @@ export default async function Leaders() {
       <h1 className="h-display">Leaders</h1>
       <p className="hero-lede">
         One point per correct call. <b>Two</b> if you were on the minority side of that token&apos;s crowd and right.
-        Flat days are pushes. Ties go to more correct calls, then fewer decided calls.
+        Flat weeks are pushes. Ties go to more correct calls, then fewer decided calls.
       </p>
       {rows.length ? (
         <div className="panel tbl-wrap" style={{ padding: "4px 8px" }}>
@@ -50,7 +52,8 @@ export default async function Leaders() {
         </div>
       ) : (
         <div className="empty">
-          The board fills when round №1 settles at 00:00 UTC on Wed 23 Sep. <Link href="/">Get your calls in.</Link>
+          The board fills when round №1 settles at 00:00 UTC on {dayLabel(addDays(LAUNCH_DAY, 7))}.{" "}
+          <Link href="/">Get your calls in.</Link>
         </div>
       )}
     </>

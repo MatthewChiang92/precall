@@ -9,7 +9,7 @@ import { type Puzzle, WINDOW, pick } from "@/lib/rewind";
 type Series = { symbol: string; name: string; image: string | null; mint: string; source: string | null; bars: { t: number; c: number }[] };
 type Dir = "UP" | "DOWN";
 
-const AFTER = 5;
+const AFTER = 3;
 const BEST_KEY = "precall.rewind.best";
 
 export function Rewind({ series, first }: { series: Series[]; first: Puzzle | null }) {
@@ -100,11 +100,11 @@ export function Rewind({ series, first }: { series: Series[]; first: Puzzle | nu
           {s.image && <img className="logo" src={s.image} alt="" width={38} height={38} />}
           <div>
             <div className="t-name">{s.name}</div>
-            <div className="t-tick">{s.symbol} · last {WINDOW} trading days, dates hidden</div>
+            <div className="t-tick">{s.symbol} · last {WINDOW} weeks, dates hidden</div>
           </div>
           <div className="t-price">
             <div className="p">{fmtPrice(shown[shown.length - 1].c)}</div>
-            <div className="c muted">last close</div>
+            <div className="c muted">weekly close</div>
           </div>
         </div>
         <svg className="rw-chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${s.name} price chart`}>
@@ -132,7 +132,7 @@ export function Rewind({ series, first }: { series: Series[]; first: Puzzle | nu
                 {right ? "Right" : "Wrong"}
               </span>{" "}
               <span className="mono">
-                next day <b className={ret > 0 ? "up" : "down"}>{fmtPct(ret)}</b>
+                next week <b className={ret > 0 ? "up" : "down"}>{fmtPct(ret)}</b>
               </span>
               <div className="muted mono" style={{ fontSize: 11, marginTop: 4 }}>
                 {dayLabel(new Date(shown[shown.length - 1].t).toISOString().slice(0, 10), { day: "numeric", month: "short", year: "numeric" })} →{" "}
@@ -171,7 +171,7 @@ export function Rewind({ series, first }: { series: Series[]; first: Puzzle | nu
           Keyboard: <b>↑</b> / <b>↓</b> to call, <b>Enter</b> for the next chart. Practice only, no effect on the leaderboard.
         </p>
         <Link href="/" className="btn ghost" style={{ justifyContent: "center" }}>
-          Warmed up? Fill in today&apos;s slip →
+          Warmed up? Fill in this week&apos;s slip →
         </Link>
       </div>
     </div>

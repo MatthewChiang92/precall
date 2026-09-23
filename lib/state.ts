@@ -4,7 +4,7 @@ import { type Crowd, crowdFor, playerCount } from "./game";
 import { listTokens } from "./prestocks";
 import { PRIMARY, priceAt, readBars } from "./prices";
 import { type VibeSummary, getVibeSummary } from "./vibe";
-import { DAY_MS, HISTORY_DAYS, HOUR_MS, addDays, clock, dayStart, roundNumber } from "./time";
+import { DAY_MS, HISTORY_WEEKS, HOUR_MS, WEEK_MS, addDays, clock, dayStart, roundNumber, weekOf } from "./time";
 
 /** Context a player needs that no API states. Keyed by ticker; tokens without a note get none. */
 export const TOKEN_NOTES: Record<string, string> = {
@@ -25,7 +25,7 @@ export interface BoardToken {
   premium: number | null;
   note: string | null;
   firstSeen: string;
-  /** Live round: on-chain price at lock, latest on-chain price, move so far. Provisional. */
+  /** Live round: on-chain price at lock (daily bars), latest on-chain price (hourly), move so far. Provisional. */
   live: { open: number | null; last: number | null; lastAt: number | null; ret: number | null };
   /** Daily on-chain closes, oldest first, for the sparkline. */
   spark: { t: number; c: number }[];
@@ -58,7 +58,7 @@ export interface Board {
 export async function getBoard(now = Date.now()): Promise<Board> {
   const c = clock(now);
   const liveStart = dayStart(c.liveDay);
-  const firstHistory = addDays(c.liveDay, -HISTORY_DAYS);
+  const firstHistory = addDays(c.liveDay, -7 * HISTORY_WEEKS);
 
   const [tokens, resultRows, crowds, openCount, players, vibe] = await Promise.all([
     listTokens(),
@@ -73,10 +73,12 @@ export async function getBoard(now = Date.now()): Promise<Board> {
   const boardTokens: BoardToken[] = await Promise.all(
     tokens.map(async (t) => {
       const [hourly, daily] = await Promise.all([
-        readBars(t.mint, "1h", liveStart - 3 * DAY_MS),
+        readBars(t.mint, "1h", now - 2 * DAY_MS),
         readBars(t.mint, "1d", now - 45 * DAY_MS),
       ]);
-      const open = priceAt(hourly.bars, liveStart);
+      // The lock was up to a week ago, further back than stored hourly bars are
+      // guaranteed to reach without gaps; daily bars are refetched 100 days deep.
+      const open = priceAt(daily.bars, liveStart, "1d");
       const lastBar = hourly.bars.at(-1) ?? null;
       const last = lastBar?.c ?? null;
       const dayAgo = priceAt(hourly.bars, now - 24 * HOUR_MS);
@@ -135,20 +137,27 @@ export async function getBoard(now = Date.now()): Promise<Board> {
   };
 }
 
-/** Daily on-chain closes for every listed token, for Rewind. */
-export async function getRewindSeries() {
+/**
+ * Weekly on-chain closes (Monday 00:00 UTC, same instants as the game) for every
+ * listed token, for Rewind. `t` is the close instant. A week with no trades carries
+ * the last close forward; the week in progress is left out.
+ */
+export async function getRewindSeries(now = Date.now()) {
   const tokens = await listTokens();
   return Promise.all(
     tokens.map(async (t) => {
       const { bars, source } = await readBars(t.mint, "1d", 0);
-      return {
-        symbol: t.symbol,
-        name: t.name,
-        image: t.image,
-        mint: t.mint,
-        source,
-        bars: bars.map((b) => ({ t: b.t, c: b.c })),
-      };
+      const weekly: { t: number; c: number }[] = [];
+      if (bars.length) {
+        let k = 0;
+        let last = bars[0].c;
+        // A day's grace after the close, so the final daily bar has been refetched.
+        for (let end = dayStart(weekOf(bars[0].t)) + WEEK_MS; end + DAY_MS <= now; end += WEEK_MS) {
+          while (k < bars.length && bars[k].t + DAY_MS <= end) last = bars[k++].c;
+          weekly.push({ t: end, c: last });
+        }
+      }
+      return { symbol: t.symbol, name: t.name, image: t.image, mint: t.mint, source, bars: weekly };
     }),
   );
 }

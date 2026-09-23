@@ -618,7 +618,7 @@ function Game({
               Fly again
             </button>
             <Link className="btn ghost" href="/">
-              Call {s.symbol} for tomorrow
+              Call {s.symbol} for next week
             </Link>
           </div>
         </div>

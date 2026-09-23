@@ -16,13 +16,25 @@ export function dayLabel(day: string, opts: Intl.DateTimeFormatOptions = { weekd
   return new Date(`${day}T00:00:00Z`).toLocaleDateString("en-GB", { ...opts, timeZone: "UTC" });
 }
 
+/** A round's week, from its Monday: "21–27 Sep", or "28 Sep – 4 Oct" across months. */
+export function weekLabel(monday: string): string {
+  const a = new Date(`${monday}T00:00:00Z`);
+  const b = new Date(a.getTime() + 6 * 86_400_000);
+  const f = (d: Date, o: Intl.DateTimeFormatOptions) => d.toLocaleDateString("en-GB", { ...o, timeZone: "UTC" });
+  return a.getUTCMonth() === b.getUTCMonth()
+    ? `${a.getUTCDate()}–${f(b, { day: "numeric", month: "short" })}`
+    : `${f(a, { day: "numeric", month: "short" })} – ${f(b, { day: "numeric", month: "short" })}`;
+}
+
 export function countdown(ms: number): string {
   if (ms <= 0) return "00:00:00";
   const s = Math.floor(ms / 1000);
-  const h = Math.floor(s / 3600);
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
   const m = Math.floor((s % 3600) / 60);
   const sec = s % 60;
-  return [h, m, sec].map((x) => String(x).padStart(2, "0")).join(":");
+  const hms = [h, m, sec].map((x) => String(x).padStart(2, "0")).join(":");
+  return d ? `${d}d ${hms}` : hms;
 }
 
 export function jupiterUrl(mint: string) {

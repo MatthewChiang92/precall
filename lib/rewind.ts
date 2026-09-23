@@ -1,7 +1,8 @@
 // Shared by the Rewind server page (first deal) and the client (every next deal).
 
 export type Puzzle = { s: number; i: number };
-export const WINDOW = 20;
+/** Weeks of history shown before the call. */
+export const WINDOW = 8;
 
 export function pick(series: { bars: { c: number }[] }[]): Puzzle | null {
   if (!series.length) return null;

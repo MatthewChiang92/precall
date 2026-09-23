@@ -11,12 +11,12 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://precall-six.vercel.app
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
-  title: "PreCall: the daily pre-IPO call",
+  title: "PreCall: the weekly pre-IPO call",
   description:
-    "Call UP or DOWN on every PreStocks pre-IPO token (OpenAI, Anthropic, SpaceX and more). Calls lock at 00:00 UTC and settle on on-chain Solana prices. Free, no wallet needed.",
+    "Call UP or DOWN on every PreStocks pre-IPO token (OpenAI, Anthropic, SpaceX and more). Calls lock every Monday 00:00 UTC and settle a week later on on-chain Solana prices. Free, no wallet needed.",
   openGraph: {
-    title: "PreCall: the daily pre-IPO call",
-    description: "Call tomorrow's move on OpenAI, Anthropic, SpaceX and every PreStocks token. Settled on-chain.",
+    title: "PreCall: the weekly pre-IPO call",
+    description: "Call next week's move on OpenAI, Anthropic, SpaceX and every PreStocks token. Settled on-chain.",
     type: "website",
   },
   twitter: { card: "summary_large_image" },
@@ -32,7 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <div className="mast-inner">
             <Link href="/" className="brand" aria-label="PreCall home">
               <span className="brand-word">PreCall</span>
-              <span className="brand-sub">the daily pre-IPO call · on Solana</span>
+              <span className="brand-sub">the weekly pre-IPO call · on Solana</span>
             </Link>
             <nav className="nav">
               <Link href="/">Play</Link>
