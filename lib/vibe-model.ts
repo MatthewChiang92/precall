@@ -18,11 +18,11 @@ export const NEWS_GAIN = 2.5;
 export const NEWS_RECENCY = [1, 0.5, 0.25];
 
 export const BANDS = [
-  { to: 25, word: "Extreme fear", color: "#c2321c" },
-  { to: 45, word: "Fear", color: "#e0835f" },
-  { to: 56, word: "Neutral", color: "#b9ae94" },
-  { to: 76, word: "Greed", color: "#6fae7f" },
-  { to: 101, word: "Extreme greed", color: "#0b7a45" },
+  { to: 25, word: "Extreme fear", color: "#eb5757" },
+  { to: 45, word: "Fear", color: "#f2994a" },
+  { to: 56, word: "Neutral", color: "#a7b0c3" },
+  { to: 76, word: "Greed", color: "#56c48a" },
+  { to: 101, word: "Extreme greed", color: "#27ae60" },
 ];
 
 export function band(v: number) {

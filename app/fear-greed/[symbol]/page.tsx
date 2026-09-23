@@ -110,18 +110,18 @@ export default async function CompanyVibe(props: PageProps<"/fear-greed/[symbol]
           <VibeChart
             days={v.days}
             lines={[
-              { label: "Token price", color: "#8a8272", axis: "price", points: c.price.map((p) => ({ day: p.day, v: p.c })) },
-              { label: "Fear & greed", color: "#16130f", axis: "score", points: c.series.map((r) => ({ day: r.day, v: r.score })) },
+              { label: "Token price", color: "#929aa9", axis: "price", points: c.price.map((p) => ({ day: p.day, v: p.c })) },
+              { label: "Fear & greed", color: "#6264d9", axis: "score", points: c.series.map((r) => ({ day: r.day, v: r.score })) },
             ]}
             marker={v.premiumFrom ? { day: v.premiumFrom, label: "4 factors from here · 3 before" } : null}
           />
           <div className="chart-legend">
             <span>
-              <i style={{ borderColor: "#16130f" }} />
+              <i style={{ borderColor: "#6264d9" }} />
               Fear &amp; greed (left, 0-100)
             </span>
             <span>
-              <i style={{ borderColor: "#8a8272" }} />
+              <i style={{ borderColor: "#929aa9" }} />
               {c.name} token price (right)
             </span>
           </div>

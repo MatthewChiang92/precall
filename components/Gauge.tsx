@@ -1,6 +1,6 @@
 import { BANDS } from "@/lib/vibe-model";
 
-/** Half-dial 0-100 gauge, CoinMarketCap fear/greed style, drawn in ink. */
+/** Half-dial 0-100 gauge, CoinMarketCap fear/greed style, drawn in PreStocks navy. */
 export function Gauge({ value, size = 220 }: { value: number | null; size?: number }) {
   const r = size / 2 - 14;
   const cx = size / 2;
@@ -21,8 +21,8 @@ export function Gauge({ value, size = 220 }: { value: number | null; size?: numb
       {arcs}
       {value !== null && (
         <>
-          <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#16130f" strokeWidth={3} strokeLinecap="round" />
-          <circle cx={cx} cy={cy} r={6} fill="#16130f" />
+          <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#14154f" strokeWidth={3} strokeLinecap="round" />
+          <circle cx={cx} cy={cy} r={6} fill="#14154f" />
         </>
       )}
     </svg>

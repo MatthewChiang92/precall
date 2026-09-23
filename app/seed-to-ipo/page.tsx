@@ -27,7 +27,7 @@ export default async function FlyPage() {
       <div className="kicker">Arcade · real funding rounds · real on-chain candles</div>
       <h1 className="h-display">Seed to IPO</h1>
       <p className="hero-lede">
-        Fly a pre-IPO company through its life. <b>Gold pipes are its real funding rounds</b>, then{" "}
+        Fly a pre-IPO company through its life. <b>Indigo pipes are its real funding rounds</b>, then{" "}
         <b>every pipe is a real weekly candle</b> of its PreStocks token. SpaceX ends at the Nasdaq bell; the others
         haven&apos;t got there yet.
       </p>

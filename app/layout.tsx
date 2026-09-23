@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Big_Shoulders, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { Inter, Roboto_Mono } from "next/font/google";
 import Link from "next/link";
+import { BrandMark, Nav } from "@/components/Nav";
 import "./globals.css";
 
-const display = Big_Shoulders({ variable: "--font-display", subsets: ["latin"], weight: ["600", "800", "900"] });
-const sans = IBM_Plex_Sans({ variable: "--font-sans", subsets: ["latin"], weight: ["400", "500", "600"] });
-const mono = IBM_Plex_Mono({ variable: "--font-mono", subsets: ["latin"], weight: ["400", "500", "600"] });
+// PreStocks type: Inter for everything, Roboto Mono for figures.
+const sans = Inter({ variable: "--font-sans", subsets: ["latin"], weight: ["400", "500", "600", "700"] });
+const mono = Roboto_Mono({ variable: "--font-mono", subsets: ["latin"], weight: ["400", "500", "600"] });
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://precall-six.vercel.app";
 
@@ -22,27 +23,20 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
 };
 
-export const viewport: Viewport = { themeColor: "#f1ebdd", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#ffffff", width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
+    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body>
         <header className="mast">
           <div className="mast-inner">
             <Link href="/" className="brand" aria-label="PreCall home">
+              <BrandMark />
               <span className="brand-word">PreCall</span>
               <span className="brand-sub">the weekly pre-IPO call · on Solana</span>
             </Link>
-            <nav className="nav">
-              <Link href="/">Play</Link>
-              <Link href="/fear-greed">Fear &amp; Greed</Link>
-              <Link href="/rewind">Rewind</Link>
-              <Link href="/seed-to-ipo">Seed to IPO</Link>
-              <Link href="/ipo">IPO Guide</Link>
-              <Link href="/leaderboard">Leaders</Link>
-              <Link href="/how">How it works</Link>
-            </nav>
+            <Nav />
           </div>
         </header>
         <main className="page">{children}</main>

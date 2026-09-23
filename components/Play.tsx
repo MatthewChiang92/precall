@@ -288,7 +288,7 @@ function Ticket({
           <div className="t-name">{t.name}</div>
           <div className="t-tick">
             {t.symbol}
-            {isNew && <span className="chip" style={{ marginLeft: 6, background: "var(--hi)" }}>NEW LISTING</span>}
+            {isNew && <span className="chip brand" style={{ marginLeft: 6 }}>New listing</span>}
           </div>
         </div>
         <div className="t-price">
@@ -453,7 +453,7 @@ function LiveRound({ board, mine, crowd }: { board: Board; mine: Record<string, 
     <section className="section">
       <div className="section-head">
         <h2 className="h-section">
-          Live · {board.liveRound >= 1 ? `Round №${board.liveRound}` : "Warm-up"} <span className="muted" style={{ fontSize: 18 }}>{weekLabel(board.liveDay)}</span>
+          Live · {board.liveRound >= 1 ? `Round №${board.liveRound}` : "Warm-up"} <span className="muted" style={{ fontSize: 15, fontWeight: 500 }}>{weekLabel(board.liveDay)}</span>
         </h2>
         <span className="kicker">
           locked {dayLabel(board.liveDay)} 00:00 UTC · settles {dayLabel(board.openDay)} 00:00 UTC ·{" "}
@@ -466,7 +466,7 @@ function LiveRound({ board, mine, crowd }: { board: Board; mine: Record<string, 
           )}
         </span>
       </div>
-      <div className="panel tbl-wrap" style={{ padding: "4px 8px" }}>
+      <div className="panel tbl-wrap">
         <table className="ledger">
           <thead>
             <tr>
@@ -658,7 +658,7 @@ function NameForm({
         maxLength={16}
         aria-label="Leaderboard name"
       />
-      <button className="btn ghost" style={{ fontSize: 15, padding: "4px 10px 3px" }} disabled={busy || !pid} type="submit">
+      <button className="btn ghost" style={{ fontSize: 13.5, padding: "8px 14px" }} disabled={busy || !pid} type="submit">
         Save
       </button>
       <span className="muted mono" style={{ fontSize: 10.5 }}>optional · no sign-up</span>

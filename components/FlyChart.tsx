@@ -100,19 +100,20 @@ const BEST_KEY = "precall.fly.best.v3"; // v3: weekly candles, so courses are mu
 const MAX_CLIMB = 150;
 const MAX_DROP = 210;
 
+// PreStocks palette (see globals.css); canvas cannot read CSS variables.
 const C = {
-  paper: "#f1ebdd",
-  card: "#fbf8f1",
-  ink: "#16130f",
-  ink3: "#8a8272",
-  rule: "#cfc5ae",
-  up: "#0b7a45",
-  upBg: "#d7ecd9",
-  down: "#c2321c",
-  downBg: "#f6d9d1",
-  hi: "#f3d43b",
-  round: "#8a6d00",
-  roundBg: "#f7e8a6",
+  paper: "#f7f8fa",
+  card: "#ffffff",
+  ink: "#14154f",
+  ink3: "#929aa9",
+  rule: "#e1e6ea",
+  up: "#16a34a",
+  upBg: "#e7f7ed",
+  down: "#eb5757",
+  downBg: "#ffefef",
+  hi: "#6264d9",
+  round: "#6264d9",
+  roundBg: "#e3e5fa",
 };
 
 /** A weekly candle is dated by the last day of its week (its close is the next midnight). */
@@ -295,7 +296,7 @@ function Game({
 
     // Canvas cannot resolve CSS variables, so read the loaded next/font families once.
     const css = getComputedStyle(document.documentElement);
-    const fDisplay = css.getPropertyValue("--font-display").trim() || "Impact";
+    const fDisplay = css.getPropertyValue("--font-sans").trim() || "system-ui, sans-serif";
     const fMono = css.getPropertyValue("--font-mono").trim() || "monospace";
 
     // Dev-only handle so the autopilot test can read the world. Never in production.
@@ -360,7 +361,7 @@ function Game({
       ctx.translate(x - 8, H - GROUND - 12);
       ctx.rotate(-Math.PI / 2);
       ctx.fillStyle = color;
-      ctx.font = `900 16px ${fDisplay}`;
+      ctx.font = `700 13px ${fDisplay}`;
       ctx.textAlign = "left";
       ctx.fillText(text, 0, 0);
       ctx.restore();
@@ -370,8 +371,8 @@ function Game({
       const w = world.current!;
       ctx.fillStyle = C.paper;
       ctx.fillRect(0, 0, W, H);
-      // ledger lines
-      ctx.strokeStyle = "rgba(90,75,40,0.07)";
+      // faint grid
+      ctx.strokeStyle = "rgba(98,100,217,0.06)";
       ctx.lineWidth = 1;
       for (let y = 32; y < H; y += 32) {
         ctx.beginPath();
@@ -419,9 +420,9 @@ function Game({
         for (const [y, h] of rects) {
           ctx.fillStyle = fill;
           ctx.fillRect(px, y, PIPE_W, h);
-          ctx.strokeStyle = C.ink;
-          ctx.lineWidth = 2;
-          ctx.strokeRect(px + 1, y, PIPE_W - 2, h);
+          ctx.strokeStyle = edge;
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(px + 0.75, y, PIPE_W - 1.5, h);
           // wick
           ctx.strokeStyle = edge;
           ctx.lineWidth = 3;
@@ -431,7 +432,7 @@ function Game({
           ctx.stroke();
         }
         // lip caps
-        ctx.fillStyle = C.ink;
+        ctx.fillStyle = edge;
         ctx.fillRect(px - 4, g - GAP / 2 - 10, PIPE_W + 8, 10);
         ctx.fillRect(px - 4, g + GAP / 2, PIPE_W + 8, 10);
         // funding-round tag: stage + post-money valuation, pinned above the gap
@@ -440,14 +441,16 @@ function Game({
           const tw = 92;
           const ty = g - GAP / 2 - 52;
           ctx.fillStyle = C.card;
-          ctx.fillRect(px + PIPE_W / 2 - tw / 2, ty, tw, 36);
-          ctx.strokeStyle = C.ink;
-          ctx.lineWidth = 2;
-          ctx.strokeRect(px + PIPE_W / 2 - tw / 2, ty, tw, 36);
+          ctx.strokeStyle = C.rule;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(px + PIPE_W / 2 - tw / 2 + 0.5, ty + 0.5, tw - 1, 35, 8);
+          ctx.fill();
+          ctx.stroke();
           ctx.fillStyle = C.ink;
           ctx.textAlign = "center";
-          ctx.font = `900 13px ${fDisplay}`;
-          ctx.fillText(tag.label.toUpperCase().slice(0, 14), px + PIPE_W / 2, ty + 15);
+          ctx.font = `700 12px ${fDisplay}`;
+          ctx.fillText(tag.label.slice(0, 14), px + PIPE_W / 2, ty + 15);
           ctx.font = `600 11px ${fMono}`;
           ctx.fillText(fmtUsdBig(tag.v), px + PIPE_W / 2, ty + 30);
         }
@@ -456,16 +459,16 @@ function Game({
       // the moment the PreStocks token went live: between the last round and first candle
       if (nRounds > 0 && nRounds < n) {
         const lx = (pipeX(nRounds - 1, w.x) + PIPE_W + pipeX(nRounds, w.x)) / 2;
-        if (lx > -40 && lx < W + 40) marker(lx, "PRESTOCKS TOKEN · ON-CHAIN", C.ink);
+        if (lx > -40 && lx < W + 40) marker(lx, "PreStocks token · on-chain", C.ink);
       }
       // finish: the listing bell, or an open question
       const fx = pipeX(n, w.x) + PIPE_W / 2 - SPACING / 2 + 40;
-      if (fx > -40 && fx < W + 40) marker(fx, s.listing ? `IPO · ${s.listing.venue}` : "IPO: NOT YET", s.listing ? C.up : C.down);
+      if (fx > -40 && fx < W + 40) marker(fx, s.listing ? `IPO · ${s.listing.venue}` : "IPO: not yet", s.listing ? C.up : C.down);
 
       // ground
-      ctx.fillStyle = C.ink;
-      ctx.fillRect(0, H - GROUND, W, GROUND);
       ctx.fillStyle = C.hi;
+      ctx.fillRect(0, H - GROUND, W, GROUND);
+      ctx.fillStyle = "rgba(255,255,255,0.45)";
       for (let x = -((w.x * 1) % 24); x < W; x += 24)
         ctx.fillRect(x, H - GROUND + 10, 12, 4);
 
@@ -487,13 +490,13 @@ function Game({
         ctx.restore();
       }
       ctx.lineWidth = 2.5;
-      ctx.strokeStyle = C.ink;
+      ctx.strokeStyle = C.hi;
       ctx.beginPath();
       ctx.arc(0, 0, R, 0, Math.PI * 2);
       ctx.stroke();
       // wing
       ctx.fillStyle = C.hi;
-      ctx.strokeStyle = C.ink;
+      ctx.strokeStyle = "#fff";
       ctx.lineWidth = 2;
       const flapUp = phaseRef.current === "playing" && w.vy < 0;
       ctx.beginPath();
@@ -513,7 +516,7 @@ function Game({
       // HUD
       const idx = Math.min(n - 1, w.passed);
       ctx.fillStyle = C.ink;
-      ctx.font = `900 54px ${fDisplay}`;
+      ctx.font = `700 48px ${fDisplay}`;
       ctx.textAlign = "center";
       ctx.fillText(String(w.passed), W / 2, 70);
       ctx.font = `500 12px ${fMono}`;
@@ -571,8 +574,9 @@ function Game({
           width: "100%",
           aspectRatio: `${W} / ${H}`,
           display: "block",
-          border: `2px solid ${C.ink}`,
-          borderRadius: 4,
+          border: `1px solid ${C.rule}`,
+          borderRadius: 16,
+          boxShadow: "0 4px 22px rgba(98, 100, 217, 0.11)",
           touchAction: "none",
           cursor: "pointer",
         }}
@@ -658,10 +662,10 @@ function Sidebar({
           <button
             key={x.symbol}
             type="button"
-            className={`stamp ${i === pick ? "picked up-btn" : ""}`}
+            className={`stamp ${i === pick ? "picked brand-btn" : ""}`}
             style={{
-              fontSize: 17,
-              padding: "8px 6px 6px",
+              fontSize: 14,
+              padding: "8px 10px",
               display: "flex",
               alignItems: "center",
               gap: 8,
@@ -678,7 +682,7 @@ function Sidebar({
                 height={22}
                 style={{
                   borderRadius: "50%",
-                  border: "1.5px solid #16130f",
+                  border: `1px solid ${C.rule}`,
                   background: "#fff",
                 }}
               />
@@ -699,7 +703,7 @@ function Sidebar({
         ))}
       </div>
       <p className="muted" style={{ margin: 0, fontSize: 13 }}>
-        <b>Gold pipes are real funding rounds</b>, climbing with the company&apos;s
+        <b>Indigo pipes are real funding rounds</b>, climbing with the company&apos;s
         valuation (log scale). Then come the PreStocks token&apos;s{" "}
         <b>real on-chain weekly candles</b>: the gap follows the
         week&apos;s close, green up, red down. On violent weeks the gap eases toward the

@@ -18,7 +18,7 @@ export default async function Leaders() {
         Flat weeks are pushes. Ties go to more correct calls, then fewer decided calls.
       </p>
       {rows.length ? (
-        <div className="panel tbl-wrap" style={{ padding: "4px 8px" }}>
+        <div className="panel tbl-wrap">
           <table className="ledger">
             <thead>
               <tr>

@@ -89,18 +89,18 @@ export default async function VibePage() {
           <VibeChart
             days={v.days}
             lines={[
-              { label: "Crypto fear & greed", color: "#8a8272", dash: "5 4", axis: "score", points: v.crypto.map((c) => ({ day: c.day, v: c.v })) },
-              { label: "PreStocks fear & greed", color: "#16130f", axis: "score", points: v.market.map((r) => ({ day: r.day, v: r.score })) },
+              { label: "Crypto fear & greed", color: "#929aa9", dash: "5 4", axis: "score", points: v.crypto.map((c) => ({ day: c.day, v: c.v })) },
+              { label: "PreStocks fear & greed", color: "#6264d9", axis: "score", points: v.market.map((r) => ({ day: r.day, v: r.score })) },
             ]}
             marker={v.premiumFrom ? { day: v.premiumFrom, label: "premium factor starts" } : null}
           />
           <div className="chart-legend">
             <span>
-              <i style={{ borderColor: "#16130f" }} />
+              <i style={{ borderColor: "#6264d9" }} />
               PreStocks fear &amp; greed (mean of the companies scored that day)
             </span>
             <span>
-              <i style={{ borderColor: "#8a8272", borderTopStyle: "dashed" }} />
+              <i style={{ borderColor: "#929aa9", borderTopStyle: "dashed" }} />
               Crypto fear &amp; greed (alternative.me)
             </span>
           </div>

@@ -44,8 +44,8 @@ function Spark({ xs }: { xs: (number | null)[] }) {
   });
   return (
     <svg width={w} height={h} aria-hidden="true">
-      <line x1={0} x2={w} y1={h / 2} y2={h / 2} stroke="#cfc5ae" strokeDasharray="2 3" />
-      <path d={d} fill="none" stroke="#16130f" strokeWidth={1.5} />
+      <line x1={0} x2={w} y1={h / 2} y2={h / 2} stroke="#e1e6ea" strokeDasharray="2 3" />
+      <path d={d} fill="none" stroke="#6264d9" strokeWidth={1.5} />
     </svg>
   );
 }
@@ -98,7 +98,7 @@ export function VibeTable({ rows }: { rows: VibeTableRow[] }) {
           {win === 1 ? "today's reading" : `mean of the last ${win} daily readings`} · heat = headlines in the window
         </span>
       </div>
-      <div className="panel tbl-wrap" style={{ padding: "4px 8px" }}>
+      <div className="panel tbl-wrap">
         <table className="ledger">
           <thead>
             <tr>

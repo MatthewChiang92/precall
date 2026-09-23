@@ -8,14 +8,23 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const revalidate = 3600;
 
-const display = readFile(join(process.cwd(), "assets/fonts/BigShoulders-900.ttf"));
-const mono = readFile(join(process.cwd(), "assets/fonts/IBMPlexMono-500.ttf"));
+const bold = readFile(join(process.cwd(), "assets/fonts/Inter-700.woff"));
+const medium = readFile(join(process.cwd(), "assets/fonts/Inter-500.woff"));
 
-const INK = "#16130f";
-const PAPER = "#f1ebdd";
-const HI = "#f3d43b";
-const UP = "#0b7a45";
-const DOWN = "#c2321c";
+// PreStocks palette (see globals.css)
+const NAVY = "#14154f";
+const BRAND = "#6264d9";
+const GREY = "#6a7271";
+const SURFACE = "#f7f8fa";
+const LINE = "#e1e6ea";
+const UP = "#16a34a";
+const DOWN = "#eb5757";
+
+const Tri = ({ up }: { up: boolean }) => (
+  <svg width="18" height="16" viewBox="0 0 18 16">
+    <path d={up ? "M9 1L17 15H1Z" : "M9 15L1 1H17Z"} fill={up ? UP : DOWN} />
+  </svg>
+);
 
 export default async function Image() {
   let names = ["OpenAI", "Anthropic", "SpaceX", "Anduril", "Kalshi", "Polymarket", "Neuralink", "Figure AI"];
@@ -26,50 +35,62 @@ export default async function Image() {
 
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: PAPER, color: INK, padding: "52px 64px", fontFamily: "Mono" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `5px solid ${INK}`, paddingBottom: 14 }}>
-          <div style={{ fontFamily: "Display", fontSize: 64, letterSpacing: 1 }}>PRECALL</div>
-          <div style={{ fontSize: 22, letterSpacing: 3 }}>THE WEEKLY PRE-IPO CALL · ON SOLANA</div>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", marginTop: 26, fontFamily: "Display", fontSize: 108, lineHeight: 0.9 }}>
-          <div style={{ display: "flex" }}>CALL NEXT WEEK&apos;S</div>
-          <div style={{ display: "flex" }}>
-            <span style={{ background: HI, padding: "0 10px" }}>PRE-IPO</span>
-            <span style={{ marginLeft: 26 }}>MARKET.</span>
-          </div>
-        </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 28 }}>
-          {names.slice(0, 10).map((n) => (
-            <div
-              key={n}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                border: `3px solid ${INK}`,
-                borderRadius: 6,
-                padding: "6px 14px",
-                background: "#fbf8f1",
-                fontFamily: "Display",
-                fontSize: 30,
-              }}
-            >
-              <span>{n.toUpperCase()}</span>
-              <span style={{ color: UP, fontSize: 24 }}>▲</span>
-              <span style={{ color: DOWN, fontSize: 24, marginLeft: -4 }}>▼</span>
+      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: "#fff", color: NAVY, fontFamily: "Inter" }}>
+        <div style={{ display: "flex", height: 10, background: `linear-gradient(to right, rgba(98, 100, 217, 0.9), ${BRAND})` }} />
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, padding: "44px 64px 48px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <svg width="56" height="56" viewBox="0 0 32 32">
+                <rect width="32" height="32" rx="9" fill={BRAND} />
+                <path d="M8 21.5l5.5-5.5 4 4L24 13.5" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M19.5 13.5H24V18" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <div style={{ fontSize: 46, fontWeight: 700, letterSpacing: -1 }}>PreCall</div>
             </div>
-          ))}
-        </div>
-        <div style={{ display: "flex", marginTop: "auto", fontSize: 22 }}>
-          UP or DOWN on every PreStocks token · locks Monday 00:00 UTC · settled on-chain · free
+            <div style={{ display: "flex", fontSize: 22, fontWeight: 500, color: BRAND, background: "#edeef2", borderRadius: 999, padding: "10px 22px" }}>
+              The weekly pre-IPO call · on Solana
+            </div>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", marginTop: 40, fontSize: 88, fontWeight: 700, lineHeight: 1.05, letterSpacing: -2.5 }}>
+            <div style={{ display: "flex" }}>Call next week&apos;s</div>
+            <div style={{ display: "flex" }}>
+              <span style={{ color: BRAND }}>pre-IPO</span>
+              <span style={{ marginLeft: 24 }}>market.</span>
+            </div>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 34 }}>
+            {names.slice(0, 10).map((n) => (
+              <div
+                key={n}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  border: `2px solid ${LINE}`,
+                  borderRadius: 999,
+                  padding: "8px 18px",
+                  background: SURFACE,
+                  fontSize: 26,
+                  fontWeight: 700,
+                }}
+              >
+                <span>{n}</span>
+                <Tri up />
+                <Tri up={false} />
+              </div>
+            ))}
+          </div>
+          <div style={{ display: "flex", marginTop: "auto", fontSize: 22, fontWeight: 500, color: GREY }}>
+            UP or DOWN on every PreStocks token · locks Monday 00:00 UTC · settled on-chain · free
+          </div>
         </div>
       </div>
     ),
     {
       ...size,
       fonts: [
-        { name: "Display", data: await display, weight: 900, style: "normal" },
-        { name: "Mono", data: await mono, weight: 500, style: "normal" },
+        { name: "Inter", data: await bold, weight: 700, style: "normal" },
+        { name: "Inter", data: await medium, weight: 500, style: "normal" },
       ],
     },
   );

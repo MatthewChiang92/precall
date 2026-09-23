@@ -112,7 +112,7 @@ export function Rewind({ series, first }: { series: Series[]; first: Puzzle | nu
             <line key={f} x1={P} x2={W - P} y1={P + f * (H - 2 * P)} y2={P + f * (H - 2 * P)} stroke="var(--rule)" strokeDasharray="3 4" />
           ))}
           <line x1={x(WINDOW - 1)} x2={x(WINDOW - 1)} y1={P} y2={H - P} stroke="var(--ink-3)" strokeDasharray="2 3" />
-          <path d={path(shown, 0)} fill="none" stroke="var(--ink)" strokeWidth={2.4} strokeLinejoin="round" />
+          <path d={path(shown, 0)} fill="none" stroke="var(--brand)" strokeWidth={2.4} strokeLinejoin="round" />
           {guess && (
             <path
               d={`M${x(WINDOW - 1)},${y(shown[shown.length - 1].c)}` + path(after, WINDOW).replace(/^M/, "L")}
@@ -122,7 +122,7 @@ export function Rewind({ series, first }: { series: Series[]; first: Puzzle | nu
               strokeDasharray="6 4"
             />
           )}
-          <circle cx={x(WINDOW - 1)} cy={y(shown[shown.length - 1].c)} r={5} fill="var(--hi)" stroke="var(--ink)" strokeWidth={2} />
+          <circle cx={x(WINDOW - 1)} cy={y(shown[shown.length - 1].c)} r={5} fill="var(--card)" stroke="var(--brand)" strokeWidth={2.5} />
           {guess && <circle cx={x(WINDOW)} cy={y(after[0].c)} r={5} fill={ret > 0 ? "var(--up)" : "var(--down)"} />}
         </svg>
         {guess ? (
