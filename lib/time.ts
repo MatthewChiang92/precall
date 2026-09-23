@@ -40,6 +40,24 @@ export function weekOf(ms: number): string {
   return addDays(dayOf(ms), -((d.getUTCDay() + 6) % 7));
 }
 
+/**
+ * Weekly closes from daily bars (each `t` a UTC day start). One point per UTC week,
+ * stamped at the week's close (the next Monday 00:00) and holding the last daily close
+ * before it, so a week with no trades carries the last price. Only weeks closing at or
+ * before `until` are included.
+ */
+export function weeklyCloses(daily: { t: number; c: number }[], until: number): { t: number; c: number }[] {
+  const out: { t: number; c: number }[] = [];
+  if (!daily.length) return out;
+  let k = 0;
+  let last = daily[0].c;
+  for (let end = dayStart(weekOf(daily[0].t)) + WEEK_MS; end <= until; end += WEEK_MS) {
+    while (k < daily.length && daily[k].t + DAY_MS <= end) last = daily[k++].c;
+    out.push({ t: end, c: last });
+  }
+  return out;
+}
+
 export function roundNumber(week: string): number {
   return Math.round((dayStart(week) - dayStart(LAUNCH_DAY)) / WEEK_MS) + 1;
 }

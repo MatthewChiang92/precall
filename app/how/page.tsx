@@ -109,7 +109,7 @@ export default function How() {
 
       <h2>Seed to IPO</h2>
       <p>
-        Seed to IPO flies each company through its real funding rounds, then its token&apos;s real daily candles. Every round
+        Seed to IPO flies each company through its real funding rounds, then its token&apos;s real weekly candles. Every round
         is listed with its source; rounds without a reported valuation are left out. It doesn&apos;t affect the leaderboard.
       </p>
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { dayLabel, fmtPct, fmtPrice } from "@/lib/format";
+import { DAY_MS, WEEK_MS } from "@/lib/time";
 import { BuyButton } from "./BuyButton";
 
 export type FlyRound = {
@@ -19,14 +20,15 @@ export type FlySeries = {
   image: string | null;
   mint: string;
   source: string | null;
+  /** Weekly closes, `t` = the week's close (next Monday 00:00 UTC; listing day's end for a listed company). */
   bars: { t: number; c: number }[];
   rounds: FlyRound[];
-  /** Set when the company has listed: the course ends on the listing day's candle. */
+  /** Set when the company has listed: the course ends on the listing week's candle. */
   listing: { day: string; venue: string } | null;
 };
 type Series = FlySeries;
 
-/** One pipe. Private rounds first, then the token's real daily candles. */
+/** One pipe. Private rounds first, then the token's real weekly candles. */
 type Gate =
   | { kind: "round"; label: string; date: string; v: number; raised: number | null }
   | { kind: "candle"; t: number; c: number; up: boolean; event?: FlyRound };
@@ -34,11 +36,11 @@ type Gate =
 const roundT = (d: string) => Date.parse(`${d.length === 4 ? d + "-01" : d}${d.length <= 7 ? "-01" : ""}T00:00:00Z`);
 
 function buildCourse(s: Series): Gate[] {
-  // Rounds before the first candle are pipes; a round raised while the token was
-  // already trading is tagged onto that day's candle, so the course stays in order.
-  const t0 = s.bars.length ? s.bars[0].t : Infinity;
-  const late = s.rounds.filter((r) => roundT(r.date) >= t0);
-  const rounds: Gate[] = s.rounds.filter((r) => roundT(r.date) < t0).map((r) => ({
+  // Rounds before the first candle's week are pipes; a round raised while the token was
+  // already trading is tagged onto the candle of the week it fell in, so the course stays
+  // in order. A round after the last closed week is not on the course yet.
+  const start = s.bars.length ? s.bars[0].t - WEEK_MS : Infinity;
+  const rounds: Gate[] = s.rounds.filter((r) => roundT(r.date) < start).map((r) => ({
     kind: "round",
     label: r.label,
     date: r.date,
@@ -50,9 +52,9 @@ function buildCourse(s: Series): Gate[] {
     t: b.t,
     c: b.c,
     up: i === 0 ? true : b.c >= s.bars[i - 1].c,
-    event: late.find((r) => {
+    event: s.rounds.find((r) => {
       const t = roundT(r.date);
-      return t >= b.t && (i + 1 >= s.bars.length || t < s.bars[i + 1].t);
+      return t >= (i ? s.bars[i - 1].t : start) && t < b.t;
     }),
   }));
   return [...rounds, ...candles];
@@ -93,7 +95,7 @@ const FLAP = -430; // px/s
 const R = 17; // bird radius
 const BIRD_X = 110;
 const STEP = 1 / 120; // fixed physics step
-const BEST_KEY = "precall.fly.best.v2"; // v2: courses now start at the first funding round
+const BEST_KEY = "precall.fly.best.v3"; // v3: weekly candles, so courses are much shorter
 // Largest gap-to-gap move, in px, between two pipes (up is harder than down).
 const MAX_CLIMB = 150;
 const MAX_DROP = 210;
@@ -113,6 +115,8 @@ const C = {
   roundBg: "#f7e8a6",
 };
 
+/** A weekly candle is dated by the last day of its week (its close is the next midnight). */
+const weekEnd = (t: number) => t - DAY_MS;
 const dayFmt = (t: number, year = true) =>
   new Date(t).toLocaleDateString("en-GB", {
     day: "numeric",
@@ -124,7 +128,7 @@ const dayFmt = (t: number, year = true) =>
 function gateLine(g: Gate): string {
   return g.kind === "round"
     ? `${g.label} · ${fmtRoundDate(g.date)} · valued ${fmtUsdBig(g.v)}`
-    : `${dayFmt(g.t)} · token ${fmtPrice(g.c)}`;
+    : `week to ${dayFmt(weekEnd(g.t))} · token ${fmtPrice(g.c)}`;
 }
 
 interface World {
@@ -547,7 +551,7 @@ function Game({
     story = (
       <>
         {lastRound && lastRound.kind === "round" && <>Past every private round to {fmtUsdBig(lastRound.v)}, then </>}
-        {lastRound ? "t" : "T"}he token from {dayFmt(firstCandle.t, false)} to {dayFmt(at.t, false)}:{" "}
+        {lastRound ? "t" : "T"}he token from {dayFmt(weekEnd(firstCandle.t), false)} to {dayFmt(weekEnd(at.t), false)}:{" "}
         <b className={at.c >= firstCandle.c ? "up" : "down"}>{fmtPct(at.c / firstCandle.c - 1, 1)}</b>
       </>
     );
@@ -584,7 +588,7 @@ function Game({
         <div className="fly-overlay" style={{ pointerEvents: "none" }}>
           <div className="t-name">{s.name}: seed to IPO</div>
           <div className="mono" style={{ fontSize: 12, maxWidth: 300 }}>
-            {course.filter((g) => g.kind === "round").length} funding rounds, then {s.bars.length} real daily token candles
+            {course.filter((g) => g.kind === "round").length} funding rounds, then {s.bars.length} real weekly token candles
             {s.listing ? " to the listing bell" : ""} · tap / space to flap
           </div>
         </div>
@@ -697,8 +701,8 @@ function Sidebar({
       <p className="muted" style={{ margin: 0, fontSize: 13 }}>
         <b>Gold pipes are real funding rounds</b>, climbing with the company&apos;s
         valuation (log scale). Then come the PreStocks token&apos;s{" "}
-        <b>real on-chain daily candles</b>: the gap follows the
-        close, green up, red down. On violent days the gap eases toward the
+        <b>real on-chain weekly candles</b>: the gap follows the
+        week&apos;s close, green up, red down. On violent weeks the gap eases toward the
         close so every course stays flyable. Numbers are your best run.
       </p>
       <details className="fly-rounds">

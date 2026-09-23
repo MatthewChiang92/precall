@@ -4,7 +4,7 @@ import { type Crowd, crowdFor, playerCount } from "./game";
 import { listTokens } from "./prestocks";
 import { PRIMARY, priceAt, readBars } from "./prices";
 import { type VibeSummary, getVibeSummary } from "./vibe";
-import { DAY_MS, HISTORY_WEEKS, HOUR_MS, WEEK_MS, addDays, clock, dayStart, roundNumber, weekOf } from "./time";
+import { DAY_MS, HISTORY_WEEKS, HOUR_MS, addDays, clock, dayStart, roundNumber, weeklyCloses } from "./time";
 
 /** Context a player needs that no API states. Keyed by ticker; tokens without a note get none. */
 export const TOKEN_NOTES: Record<string, string> = {
@@ -139,7 +139,7 @@ export async function getBoard(now = Date.now()): Promise<Board> {
 
 /**
  * Weekly on-chain closes (Monday 00:00 UTC, same instants as the game) for every
- * listed token, for Rewind. `t` is the close instant. A week with no trades carries
+ * listed token, for Rewind and Seed to IPO. `t` is the close instant. A week with no trades carries
  * the last close forward; the week in progress is left out.
  */
 export async function getRewindSeries(now = Date.now()) {
@@ -147,16 +147,8 @@ export async function getRewindSeries(now = Date.now()) {
   return Promise.all(
     tokens.map(async (t) => {
       const { bars, source } = await readBars(t.mint, "1d", 0);
-      const weekly: { t: number; c: number }[] = [];
-      if (bars.length) {
-        let k = 0;
-        let last = bars[0].c;
-        // A day's grace after the close, so the final daily bar has been refetched.
-        for (let end = dayStart(weekOf(bars[0].t)) + WEEK_MS; end + DAY_MS <= now; end += WEEK_MS) {
-          while (k < bars.length && bars[k].t + DAY_MS <= end) last = bars[k++].c;
-          weekly.push({ t: end, c: last });
-        }
-      }
+      // A day's grace after the close, so the final daily bar has been refetched.
+      const weekly = weeklyCloses(bars, now - DAY_MS);
       return { symbol: t.symbol, name: t.name, image: t.image, mint: t.mint, source, bars: weekly };
     }),
   );
