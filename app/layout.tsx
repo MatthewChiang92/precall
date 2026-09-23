@@ -36,9 +36,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </Link>
             <nav className="nav">
               <Link href="/">Play</Link>
-              <Link href="/vibe">Fear &amp; Greed</Link>
+              <Link href="/fear-greed">Fear &amp; Greed</Link>
               <Link href="/rewind">Rewind</Link>
-              <Link href="/fly">Seed to IPO</Link>
+              <Link href="/seed-to-ipo">Seed to IPO</Link>
               <Link href="/ipo">IPO Guide</Link>
               <Link href="/leaderboard">Leaders</Link>
               <Link href="/how">How it works</Link>

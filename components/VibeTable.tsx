@@ -111,7 +111,7 @@ export function VibeTable({ rows }: { rows: VibeTableRow[] }) {
           </thead>
           <tbody>
             {data.map((r) => {
-              const href = `/vibe/${r.symbol.toLowerCase()}`;
+              const href = `/fear-greed/${r.symbol.toLowerCase()}`;
               const b = r.score === null ? null : band(r.score);
               return (
                 <tr key={r.symbol} className="link-row" onClick={() => router.push(href)}>

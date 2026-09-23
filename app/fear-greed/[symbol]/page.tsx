@@ -13,7 +13,7 @@ import { FACTORS, FACTOR_LABEL, WEIGHTS, band, type Factor } from "@/lib/vibe-mo
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
-export async function generateMetadata(props: PageProps<"/vibe/[symbol]">): Promise<Metadata> {
+export async function generateMetadata(props: PageProps<"/fear-greed/[symbol]">): Promise<Metadata> {
   const { symbol } = await props.params;
   return { title: `${symbol.toUpperCase()} fear & greed · PreCall` };
 }
@@ -25,7 +25,7 @@ const WHY: Record<Factor, string> = {
   premium: "Token price over its PreStocks mark, ranked against the other companies. Recorded daily since the index started.",
 };
 
-export default async function CompanyVibe(props: PageProps<"/vibe/[symbol]">) {
+export default async function CompanyVibe(props: PageProps<"/fear-greed/[symbol]">) {
   const { symbol: raw } = await props.params;
   after(() => refreshAll().catch((e) => console.error("refresh", e)));
   const v = await getVibeBoard();
@@ -43,7 +43,7 @@ export default async function CompanyVibe(props: PageProps<"/vibe/[symbol]">) {
   return (
     <>
       <div className="kicker">
-        <Link href="/vibe">← PreStocks fear &amp; greed</Link> · {dayLabel(v.day)}
+        <Link href="/fear-greed">← PreStocks fear &amp; greed</Link> · {dayLabel(v.day)}
       </div>
       <section className="vibe-grid" style={{ marginTop: 10 }}>
         <div className="panel">

@@ -191,7 +191,7 @@ export function Play({ initial }: { initial: Board }) {
         <div className="panel">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
             <div className="kicker">PreStocks fear &amp; greed · today</div>
-            <Link href="/vibe" className="kicker">
+            <Link href="/fear-greed" className="kicker">
               full index →
             </Link>
           </div>
@@ -314,7 +314,7 @@ function Ticket({
           label="Buy"
           token={{ symbol: t.symbol, name: t.name, mint: t.mint, image: t.image, url: t.url, price: t.tokenPrice, premium: t.premium }}
         />
-        <Link href={`/vibe/${t.symbol.toLowerCase()}`}>Why this score</Link>
+        <Link href={`/fear-greed/${t.symbol.toLowerCase()}`}>Why this score</Link>
         {t.url && (
           <a href={t.url} target="_blank" rel="noreferrer">
             PreStocks ↗
@@ -416,7 +416,7 @@ function VibeChip({ score, href }: { score: number | null; href: string }) {
 }
 
 function TicketVibe({ symbol, vibe }: { symbol: string; vibe: VibeSummary["bySymbol"][string] | null }) {
-  const href = `/vibe/${symbol.toLowerCase()}`;
+  const href = `/fear-greed/${symbol.toLowerCase()}`;
   const top = vibe?.top ?? null;
   return (
     <div className="t-vibe">
