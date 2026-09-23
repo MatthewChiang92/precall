@@ -12,6 +12,7 @@ Live: https://precall-six.vercel.app · Built for the [Stocklana hackathon](http
 | **Play** (`/`) | Every week, call each PreStocks token UP or DOWN. Calls lock Monday 00:00 UTC and settle a week later on real on-chain closes. Streaks, a leaderboard, a double-points bonus for calling against the crowd, and a share grid. | PreStocks registry (read at runtime, so new listings join automatically), GMGN token-level candles, GeckoTerminal fallback |
 | **Seed to IPO** (`/fly`) | Flappy-style arcade. Gold pipes are the company's **real funding rounds**, rising with its valuation. Then every pipe is a **real daily candle** of its PreStocks token. SpaceX's course ends at the Nasdaq bell. | Sourced funding history (`lib/data/funding.json`, a source URL for every round), on-chain candles |
 | **Rewind** (`/rewind`) | Instant practice: call the next week on a real stretch of history, dates hidden. | On-chain weekly closes |
+| **IPO Guide** (`/ipo`) | Eight steps through what happens to a pre-IPO token when its company goes public or is bought: the lockup, the discount, converting, the 9-month deadline. Multiple choice, with a judgement call that has no right answer. | PreStocks' FAQ (`prestocks.com/faq`), no company-specific numbers |
 
 Playing needs no wallet and no sign-up. Every token has a **Buy** button that opens the [Jupiter Plugin](https://developers.jup.ag/docs/tool-kits/plugin) swap in a dialog, with the output mint **fixed to that PreStocks token**. Jupiter handles the wallet; PreCall never touches keys or funds.
 

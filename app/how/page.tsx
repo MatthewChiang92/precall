@@ -113,6 +113,16 @@ export default function How() {
         is listed with its source; rounds without a reported valuation are left out. It doesn&apos;t affect the leaderboard.
       </p>
 
+      <h2>IPO guide</h2>
+      <p>
+        The IPO guide walks through what happens to a PreStocks token when its company goes public or is bought. Every
+        answer is taken from{" "}
+        <a href="https://prestocks.com/faq" target="_blank" rel="noreferrer">
+          PreStocks&apos; FAQ
+        </a>
+        . It uses no company&apos;s real numbers, and it doesn&apos;t affect the leaderboard.
+      </p>
+
       <h2>Privacy</h2>
       <p>
         No account, no wallet, no email. Your browser holds a random id; that id is your only credential and is never shown

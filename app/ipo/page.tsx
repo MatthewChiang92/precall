@@ -1,21 +1,22 @@
 import type { Metadata } from "next";
-import { IpoReplay } from "@/components/IpoReplay";
+import { IpoGuide } from "@/components/IpoGuide";
 
 export const metadata: Metadata = {
-  title: "The Bell: SpaceX IPO Replay · PreCall",
-  description: "SpaceX was the first PreStocks company to go public. Relive what the bell did to the pre-IPO token, hour by hour, on real on-chain data.",
+  title: "IPO Guide · PreCall",
+  description:
+    "What happens to a PreStocks pre-IPO token when its company goes public: the lockup, the discount, conversion and the deadline. Make the calls a holder has to make.",
 };
 
 export default function IpoPage() {
   return (
     <>
-      <div className="kicker">IPO replay · real on-chain data</div>
-      <h1 className="h-display">The bell</h1>
+      <div className="kicker">IPO guide · 8 steps · straight from PreStocks&apos; FAQ</div>
+      <h1 className="h-display">Going public</h1>
       <p className="hero-lede">
-        On 12 June 2026 SpaceX became the first PreStocks company to go public. <b>The stock rose on its first day. The
-        pre-IPO token fell.</b> Relive it with $1,000 and make the calls yourself.
+        What happens to your pre-IPO token when the company lists? Walk through it step by step and make the calls a holder
+        has to make: <b>the lockup, the discount, converting, and the deadline</b>.
       </p>
-      <IpoReplay />
+      <IpoGuide />
     </>
   );
 }
