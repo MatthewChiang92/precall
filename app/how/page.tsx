@@ -95,8 +95,7 @@ export default function How() {
       <p>
         SpaceX listed on Nasdaq (SPCX) on 12 June 2026 after a 5-for-1 split. PreStocks applied the split on-chain with the
         token&apos;s Token-2022 display multiplier, so price feeds quote one raw token as five post-split shares. Calls are
-        scored on percentage moves, so the basis cancels out. <a href="/ipo">The Bell</a> replays what the listing did to
-        the token.
+        scored on percentage moves, so the basis cancels out.
       </p>
 
       <h2>Rewind</h2>
@@ -105,11 +104,10 @@ export default function How() {
         there is the next daily bar, which can skip calendar days with no trades.
       </p>
 
-      <h2>Seed to IPO and The Bell</h2>
+      <h2>Seed to IPO</h2>
       <p>
         Seed to IPO flies each company through its real funding rounds, then its token&apos;s real daily candles. Every round
-        is listed with its source; rounds without a reported valuation are left out. The Bell is a replay of the SpaceX
-        listing on frozen on-chain data, with each off-chain fact linked to its source. Neither affects the leaderboard.
+        is listed with its source; rounds without a reported valuation are left out. It doesn&apos;t affect the leaderboard.
       </p>
 
       <h2>Privacy</h2>

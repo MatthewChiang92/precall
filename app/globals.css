@@ -279,11 +279,6 @@ button { font: inherit; color: inherit; }
 .ipo-result { border: 2px solid var(--ink); background: var(--card); padding: 12px 14px; border-radius: var(--radius); margin-top: 8px; }
 .src { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; }
 .src:hover { color: var(--ink); }
-.bell-banner {
-  display: inline-block; margin: 0 0 12px; padding: 7px 12px; border: 2px solid var(--ink); background: var(--hi);
-  border-radius: var(--radius); color: var(--ink); text-decoration: none; font-size: 14px;
-}
-.bell-banner:hover { background: var(--ink); color: var(--paper); }
 
 /* ------------------------------------------------------------ jupiter swap */
 .btn.buy { font-size: 16px; padding: 5px 12px 3px; background: var(--hi); color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }

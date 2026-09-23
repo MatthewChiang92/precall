@@ -14,7 +14,7 @@ export default async function FlyPage() {
       return {
         ...s,
         // SpaceX has listed: its course is the frozen pre-listing history (per post-split
-        // share, as on The Bell), ending on listing day.
+        // share), ending on listing day.
         bars: listed ? IPO.preListing : s.bars,
         rounds: FUNDING[s.symbol]?.rounds ?? [],
         listing: listed ? { day: IPO.listingDay, venue: "NASDAQ: SPCX" } : null,

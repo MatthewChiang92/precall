@@ -601,7 +601,7 @@ function Game({
           {phase === "won" && (
             <div className="mono" style={{ fontSize: 12.5, maxWidth: 320, marginTop: 6 }}>
               {s.listing
-                ? `${s.name} listed on ${dayLabel(s.listing.day, { day: "numeric", month: "short", year: "numeric" })}. See what the bell did to the token.`
+                ? `${s.name} listed on ${dayLabel(s.listing.day, { day: "numeric", month: "short", year: "numeric" })}.`
                 : `${s.name} hasn't IPO'd yet. Nobody knows how its flight ends.`}
             </div>
           )}
@@ -617,15 +617,9 @@ function Game({
             <button className="btn" type="button" onClick={restart} autoFocus>
               Fly again
             </button>
-            {s.listing ? (
-              <Link className="btn ghost" href="/ipo">
-                Replay the IPO →
-              </Link>
-            ) : (
-              <Link className="btn ghost" href="/">
-                Call {s.symbol} for tomorrow
-              </Link>
-            )}
+            <Link className="btn ghost" href="/">
+              Call {s.symbol} for tomorrow
+            </Link>
           </div>
         </div>
       )}

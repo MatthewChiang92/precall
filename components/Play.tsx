@@ -175,9 +175,6 @@ export function Play({ initial }: { initial: Board }) {
             token: OpenAI, Anthropic, SpaceX and the rest. Calls lock at <b>00:00 UTC</b> and settle 24 hours later on{" "}
             <b>on-chain Solana prices</b>. Beat the crowd for double points.
           </p>
-          <Link href="/ipo" className="bell-banner">
-            <b>New · The Bell:</b> SpaceX&apos;s stock rose 19% on IPO day. Its pre-IPO token fell 25%. Relive it →
-          </Link>
           <div className="clockbox" suppressHydrationWarning>
             <span className="t mono" suppressHydrationWarning>
               {countdown(lockIn)}
