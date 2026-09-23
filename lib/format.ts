@@ -9,7 +9,10 @@ export function fmtPrice(n: number | null | undefined): string {
 export function fmtPct(r: number | null | undefined, digits = 2): string {
   if (r === null || r === undefined || !Number.isFinite(r)) return "—";
   const v = r * 100;
-  return (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(digits) + "%";
+  const shown = Math.abs(v).toFixed(digits);
+  // A move that rounds to zero prints as ±0.0%, never −0.0%.
+  const sign = Number(shown) === 0 ? "±" : v > 0 ? "+" : "−";
+  return sign + shown + "%";
 }
 
 export function dayLabel(day: string, opts: Intl.DateTimeFormatOptions = { weekday: "short", day: "numeric", month: "short" }) {
