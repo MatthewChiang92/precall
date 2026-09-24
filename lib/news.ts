@@ -43,7 +43,7 @@ async function search(query: string, from: string, to: string): Promise<Omit<Sto
   const r = await fetch(url, {
     cache: "no-store",
     signal: AbortSignal.timeout(12_000),
-    headers: { "user-agent": "Mozilla/5.0 (compatible; PreCall/1.0; +https://precall-six.vercel.app)" },
+    headers: { "user-agent": "Mozilla/5.0 (compatible; PreCall/1.0; +https://precallipo.com)" },
   });
   if (!r.ok) throw new Error(`news HTTP ${r.status}`);
   const xml = await r.text();

@@ -8,7 +8,7 @@ import "./globals.css";
 const sans = Inter({ variable: "--font-sans", subsets: ["latin"], weight: ["400", "500", "600", "700"] });
 const mono = Roboto_Mono({ variable: "--font-mono", subsets: ["latin"], weight: ["400", "500", "600"] });
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://precall-six.vercel.app";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://precallipo.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
