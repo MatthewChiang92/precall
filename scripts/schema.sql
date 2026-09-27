@@ -111,3 +111,11 @@ create table if not exists vibe_daily (
   computed_at  timestamptz not null default now(),
   primary key (day, symbol)
 );
+
+-- Supabase exposes the public schema over its Data API. RLS with no policies shuts
+-- that door; the app connects as the table owner, which RLS does not apply to.
+do $$ declare t text; begin
+  for t in select tablename from pg_tables where schemaname = 'public' loop
+    execute format('alter table public.%I enable row level security', t);
+  end loop;
+end $$;

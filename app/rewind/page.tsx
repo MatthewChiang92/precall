@@ -3,7 +3,7 @@ import { Rewind } from "@/components/Rewind";
 import { WINDOW, pick } from "@/lib/rewind";
 import { getRewindSeries } from "@/lib/state";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 export const metadata: Metadata = { title: "Rewind · PreCall" };
 
 export default async function RewindPage() {

@@ -1,17 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { after } from "next/server";
 import { BuyButton } from "@/components/BuyButton";
 import { Gauge } from "@/components/Gauge";
 import { VibeChart } from "@/components/VibeChart";
 import { dayLabel, fmtPct, fmtPrice, signClass } from "@/lib/format";
-import { refreshAll } from "@/lib/rounds";
+import { warmAfter } from "@/lib/rounds";
 import { companyStories, getVibeBoard } from "@/lib/vibe";
 import { FACTORS, FACTOR_LABEL, WEIGHTS, band, type Factor } from "@/lib/vibe-model";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 export const maxDuration = 300;
+
+// No paths at build time: each company page is rendered on first visit, then cached.
+export async function generateStaticParams() {
+  return [];
+}
 
 export async function generateMetadata(props: PageProps<"/fear-greed/[symbol]">): Promise<Metadata> {
   const { symbol } = await props.params;
@@ -27,7 +31,7 @@ const WHY: Record<Factor, string> = {
 
 export default async function CompanyVibe(props: PageProps<"/fear-greed/[symbol]">) {
   const { symbol: raw } = await props.params;
-  after(() => refreshAll().catch((e) => console.error("refresh", e)));
+  warmAfter();
   const v = await getVibeBoard();
   const c = v.companies.find((x) => x.symbol.toLowerCase() === raw.toLowerCase());
   if (!c) notFound();

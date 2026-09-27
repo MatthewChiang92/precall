@@ -1,10 +1,32 @@
 import "server-only";
-import { neon } from "@neondatabase/serverless";
+import pg from "pg";
 
 const url = process.env.DATABASE_URL;
 if (!url) throw new Error("DATABASE_URL is not set");
 
-export const sql = neon(url);
+// node-postgres through Supabase's transaction pooler (port 6543): it never pipelines
+// queries on one connection, which the pooler cannot handle. TLS always, except for a
+// local database; Supabase's CA is not in Node's store, so the chain is not verified.
+const local = /@(localhost|127\.0\.0\.1)[:/]/.test(url);
+const pool = new pg.Pool({
+  connectionString: url,
+  max: 5,
+  idleTimeoutMillis: 10_000,
+  ssl: local ? false : { rejectUnauthorized: false },
+});
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Row = Record<string, any>;
+
+async function query(text: string, params: unknown[] = []): Promise<Row[]> {
+  return (await pool.query(text, params)).rows;
+}
+
+/** Tagged template: every `${value}` is a bind parameter, never spliced into the SQL. */
+export function sql(strings: TemplateStringsArray, ...values: unknown[]): Promise<Row[]> {
+  return query(strings.reduce((text, s, i) => `${text}$${i}${s}`), values);
+}
+sql.query = query;
 
 /**
  * Single-flight + throttle. Returns true for exactly one caller per `key`

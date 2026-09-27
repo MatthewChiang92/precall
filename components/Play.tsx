@@ -39,15 +39,14 @@ export function Play({ initial }: { initial: Board }) {
   const [me, setMe] = useState<Me | null>(null);
   const [pending, setPending] = useState<Record<string, Dir>>({});
   const [toast, setToast] = useState<string | null>(null);
-  const offset = useRef(0);
   const [now, setNow] = useState(initial.now);
 
-  // Server clock offset, so the countdown matches the lock the server enforces.
+  // Device clock. The board is cached, so its `now` can be minutes old; the server
+  // still enforces the lock on every call.
   useEffect(() => {
-    offset.current = initial.now - Date.now();
-    const id = setInterval(() => setNow(Date.now() + offset.current), 1000);
+    const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
-  }, [initial.now]);
+  }, []);
 
   const flash = useCallback((msg: string) => {
     setToast(msg);

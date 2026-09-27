@@ -4,7 +4,7 @@ import { dayLabel } from "@/lib/format";
 import { leaderboard } from "@/lib/game";
 import { LAUNCH_DAY, addDays } from "@/lib/time";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 export const metadata: Metadata = { title: "Leaders · PreCall" };
 
 export default async function Leaders() {

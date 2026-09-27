@@ -43,8 +43,8 @@ GMGN aggregates every pool. GeckoTerminal is only a fallback, picking the pool w
 ## Stack
 
 - **App:** Next.js 16 (App Router) on Vercel
-- **Database:** Neon Postgres
-- **Jobs:** a Vercel cron settles rounds, refreshes prices and news, and recomputes the index. Page views keep everything warm between runs (throttled, single-flight). `/api/cron?news=<seconds>` gives the news backfill a bigger slice.
+- **Database:** Supabase Postgres (free tier), via the transaction pooler
+- **Jobs:** a Vercel cron settles rounds, refreshes prices and news, and recomputes the index. Pages are cached (1-5 min, 1 h for history); each regeneration also refreshes in the background (throttled, single-flight), so the database is only touched when a cache expires. `/api/cron?news=<seconds>` gives the news backfill a bigger slice.
 - **Swap:** Jupiter Plugin, loaded on first click
 
 ## Run it

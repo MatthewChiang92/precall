@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { after } from "next/server";
 import { Gauge } from "@/components/Gauge";
 import { VibeChart } from "@/components/VibeChart";
 import { VibeTable } from "@/components/VibeTable";
 import { dayLabel } from "@/lib/format";
-import { refreshAll } from "@/lib/rounds";
+import { warmAfter } from "@/lib/rounds";
 import { getVibeBoard } from "@/lib/vibe";
 import { FACTORS, FACTOR_LABEL, WEIGHTS, band } from "@/lib/vibe-model";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 export const maxDuration = 300;
 export const metadata: Metadata = {
   title: "PreStocks Fear & Greed · PreCall",
@@ -17,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function VibePage() {
-  after(() => refreshAll().catch((e) => console.error("refresh", e)));
+  warmAfter();
   const v = await getVibeBoard();
   const now = v.market.at(-1) ?? null;
   const score = now?.score ?? null;

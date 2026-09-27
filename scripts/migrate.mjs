@@ -1,12 +1,12 @@
 // Usage: node --env-file=.env.local scripts/migrate.mjs
 import { readFileSync } from "node:fs";
-import { Pool } from "@neondatabase/serverless";
+import pg from "pg";
 
 const url = process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL;
 if (!url) throw new Error("DATABASE_URL is not set");
-const pool = new Pool({ connectionString: url });
-const sql = readFileSync(new URL("./schema.sql", import.meta.url), "utf8");
-await pool.query(sql);
+const local = /@(localhost|127\.0\.0\.1)[:/]/.test(url);
+const pool = new pg.Pool({ connectionString: url, ssl: local ? false : { rejectUnauthorized: false } });
+await pool.query(readFileSync(new URL("./schema.sql", import.meta.url), "utf8"));
 const { rows } = await pool.query(
   "select table_name from information_schema.tables where table_schema='public' order by 1",
 );
