@@ -5,12 +5,10 @@ import { BuyButton } from "@/components/BuyButton";
 import { Gauge } from "@/components/Gauge";
 import { VibeChart } from "@/components/VibeChart";
 import { dayLabel, fmtPct, fmtPrice, signClass } from "@/lib/format";
-import { warmAfter } from "@/lib/rounds";
 import { companyStories, getVibeBoard } from "@/lib/vibe";
 import { FACTORS, FACTOR_LABEL, WEIGHTS, band, type Factor } from "@/lib/vibe-model";
 
 export const revalidate = 300;
-export const maxDuration = 300;
 
 // No paths at build time: each company page is rendered on first visit, then cached.
 export async function generateStaticParams() {
@@ -31,7 +29,6 @@ const WHY: Record<Factor, string> = {
 
 export default async function CompanyVibe(props: PageProps<"/fear-greed/[symbol]">) {
   const { symbol: raw } = await props.params;
-  warmAfter();
   const v = await getVibeBoard();
   const c = v.companies.find((x) => x.symbol.toLowerCase() === raw.toLowerCase());
   if (!c) notFound();

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
 import Link from "next/link";
 import { BrandMark, Nav } from "@/components/Nav";
+import { Refresh } from "@/components/Refresh";
 import "./globals.css";
 
 // PreStocks type: Inter for everything, Roboto Mono for figures.
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </div>
         </header>
         <main className="page">{children}</main>
+        <Refresh />
         <footer className="foot">
           <p>
             A free game about{" "}

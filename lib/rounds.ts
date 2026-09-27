@@ -1,6 +1,4 @@
 import "server-only";
-import { PHASE_PRODUCTION_BUILD } from "next/constants";
-import { after } from "next/server";
 import { claim, markFetch, sql, touch } from "./db";
 import { refreshNews } from "./news";
 import { refreshRegistry } from "./prestocks";
@@ -126,16 +124,6 @@ export async function settlePending(now = Date.now()): Promise<{ settled: number
 }
 
 /** Everything the site needs kept warm. Safe to call from any request; all steps are throttled. */
-/**
- * Refresh in the background after a cached page or route regenerates. Pages are
- * cached, so this runs at most once per revalidate window, not per view. Skipped
- * while `next build` prerenders, so a build never waits on upstream APIs.
- */
-export function warmAfter() {
-  if (process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD) return;
-  after(() => refreshAll().catch((e) => console.error("refresh", e)));
-}
-
 export async function refreshAll(now = Date.now(), newsBudgetMs = 45_000) {
   await refreshRegistry();
   // Settle first: it fetches fresh daily series and marks them, so the display
